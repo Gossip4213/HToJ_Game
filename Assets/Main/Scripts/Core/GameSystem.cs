@@ -99,4 +99,17 @@ public class GameSystem : MonoBehaviour
 
         if (OnLanguageChanged != null) OnLanguageChanged.Invoke();
     }
+    public string GetLocalizedString(string key)
+    {
+        return "L10N_" + key;
+    }
+    [Header("Audio")]
+    public AudioSource bgmSource;
+    public void SetMusicVolume(float volume)
+    {
+        if (bgmSource != null)
+        {
+            bgmSource.volume = volume;
+        }
+    }
 }

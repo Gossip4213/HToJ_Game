@@ -6,20 +6,20 @@ using UnityEngine.UI;
 
 public class ScenarioManager : MonoBehaviour
 {
-    [Header("UI 组件")]
+    [Header("UI")]
     public TextMeshProUGUI txtBody;
     public TextMeshProUGUI txtSpeaker;
     public Transform choiceContainer;
     public GameObject buttonPrefab;
 
-    [Header("角色头像库")]
+    [Header("avatars")]
     public Sprite iconSera;
     public Sprite iconKate;
     public Sprite iconAdams;
     public Sprite iconMiniel;
     public Sprite iconRumins;
 
-    [Header("测试数据")]
+    [Header("Test")]
     public CaseData testCase; 
 
     void Start()
@@ -29,7 +29,7 @@ public class ScenarioManager : MonoBehaviour
 
     public void LoadCase(CaseData data)
     {
-        txtSpeaker.text = "Sera (记录员)";
+        txtSpeaker.text = "Sera";
         txtBody.text = data.description_CN;
         GenerateChoices(data.options);
     }
@@ -52,13 +52,13 @@ public class ScenarioManager : MonoBehaviour
 
     void OnOptionSelected(AdvancedOption option)
     {
-        Debug.Log("Ambrose 选择了: " + option.text_CN);
+        Debug.Log("Ambrose choose: " + option.text_CN);
 
         txtBody.text = option.outcomeText_CN;
 
         foreach (var impact in option.impacts)
         {
-            Debug.Log($"影响结算: {impact.target} {impact.valueChange}");
+            Debug.Log($"summary: {impact.target} {impact.valueChange}");
         }
 
         foreach (Transform child in choiceContainer) Destroy(child.gameObject);
