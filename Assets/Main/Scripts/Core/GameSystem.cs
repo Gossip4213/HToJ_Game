@@ -3,19 +3,20 @@ using System.IO;
 using System.Collections;
 using UnityEngine.Networking;
 using System.Text;
+using UnityEngine.SceneManagement;
 
 public class GameSystem : MonoBehaviour
 {
     public static GameSystem Instance { get; private set; }
 
     public PlayerSaveProfile CurrentSave;
-    private string savePath;
+    public bool isLoadingFromSave = false;
 
     public delegate void LanguageChangeHandler();
     public event LanguageChangeHandler OnLanguageChanged;
 
     [Header("Audio")]
-    public AudioSource bgmSource; 
+    public AudioSource bgmSource;
 
     void Awake()
     {
@@ -34,7 +35,7 @@ public class GameSystem : MonoBehaviour
     void Start()
     {
         float savedVol = PlayerPrefs.GetFloat("MusicVol", 0.75f);
-    SetMusicVolume(savedVol); 
+        SetMusicVolume(savedVol);
         if (bgmSource != null && !bgmSource.isPlaying)
         {
             bgmSource.Play();
@@ -43,31 +44,80 @@ public class GameSystem : MonoBehaviour
 
     void InitializeSystem()
     {
-        savePath = Path.Combine(Application.persistentDataPath, "messenger_save.json");
-        LoadGame();
-        Debug.Log($"[System] Core system startup. Current language.:{CurrentSave.languageCode}");
+        CurrentSave = new PlayerSaveProfile();
+        CurrentSave.languageCode = PlayerPrefs.GetString("SelectedLanguage", "EN");
+        Debug.Log($"<color=red>[Critical] Save File: {Application.persistentDataPath}</color>");
+
+        Debug.Log($"[System] System initialized. Default Language: {CurrentSave.languageCode}");
     }
-    public void SaveGame()
+
+    public string GetSavePath(int slotIndex)
     {
+        return Path.Combine(Application.persistentDataPath, $"save_data_{slotIndex}.json");
+    }
+
+    public bool HasSaveFile(int slotIndex)
+    {
+        return File.Exists(GetSavePath(slotIndex));
+    }
+    public bool HasAnySaveFile()
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            if (HasSaveFile(i))
+            {
+                return true; 
+            }
+        }
+        return false; 
+    }
+    public PlayerSaveProfile GetSaveProfile(int slotIndex)
+    {
+        string path = GetSavePath(slotIndex);
+        if (File.Exists(path))
+        {
+            try
+            {
+                string json = File.ReadAllText(path);
+                return JsonUtility.FromJson<PlayerSaveProfile>(json);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public void SaveGame(int slotIndex)
+    {
+        CurrentSave.saveTime = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm");
+
         string json = JsonUtility.ToJson(CurrentSave, true);
-        File.WriteAllText(savePath, json);
-        Debug.Log("[System] Saved");
+        File.WriteAllText(GetSavePath(slotIndex), json);
+
+        Debug.Log($"[System] Game Saved to Slot {slotIndex}");
     }
 
-    public void LoadGame()
+    public void LoadAndStartGame(int slotIndex)
     {
-        if (File.Exists(savePath))
+        string path = GetSavePath(slotIndex);
+        if (!File.Exists(path))
         {
-            string json = File.ReadAllText(savePath);
-            CurrentSave = JsonUtility.FromJson<PlayerSaveProfile>(json);
+            Debug.LogWarning($"Slot {slotIndex} is empty!");
+            return;
         }
-        else
-        {
-            CurrentSave = new PlayerSaveProfile(); 
-            CurrentSave.languageCode = "EN"; 
-        }
-    }
 
+        string json = File.ReadAllText(path);
+        CurrentSave = JsonUtility.FromJson<PlayerSaveProfile>(json);
+
+        isLoadingFromSave = true;
+
+        string sceneToLoad = string.IsNullOrEmpty(CurrentSave.currentSceneName) ? "GameScene" : CurrentSave.currentSceneName;
+        Debug.Log($"[System] Loading Slot {slotIndex}... Jumping to: {sceneToLoad}");
+
+        SceneManager.LoadScene(sceneToLoad);
+    }
 
     public void UploadChoice(string choiceID)
     {
@@ -78,7 +128,7 @@ public class GameSystem : MonoBehaviour
     {
         string url = "https://";
         ObservationLog log = new ObservationLog();
-        log.userId = SystemInfo.deviceUniqueIdentifier; 
+        log.userId = SystemInfo.deviceUniqueIdentifier;
         log.choiceId = choiceID;
         log.timestamp = System.DateTime.Now.ToString();
 
@@ -105,14 +155,14 @@ public class GameSystem : MonoBehaviour
     public void SwitchLanguage(string langCode)
     {
         CurrentSave.languageCode = langCode;
-        SaveGame(); 
-
         if (OnLanguageChanged != null) OnLanguageChanged.Invoke();
     }
+
     public string GetLocalizedString(string key)
     {
         return "L10N_" + key;
     }
+
     public void SetMusicVolume(float volume)
     {
         if (bgmSource != null)
@@ -120,4 +170,6 @@ public class GameSystem : MonoBehaviour
             bgmSource.volume = volume;
         }
     }
+
+
 }
