@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.IO;
 using System.Collections;
-using UnityEngine.Networking; 
+using UnityEngine.Networking;
 using System.Text;
 
 public class GameSystem : MonoBehaviour
@@ -13,6 +13,9 @@ public class GameSystem : MonoBehaviour
 
     public delegate void LanguageChangeHandler();
     public event LanguageChangeHandler OnLanguageChanged;
+
+    [Header("Audio")]
+    public AudioSource bgmSource; 
 
     void Awake()
     {
@@ -28,14 +31,22 @@ public class GameSystem : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        float savedVol = PlayerPrefs.GetFloat("MusicVol", 0.75f);
+    SetMusicVolume(savedVol); 
+        if (bgmSource != null && !bgmSource.isPlaying)
+        {
+            bgmSource.Play();
+        }
+    }
+
     void InitializeSystem()
     {
         savePath = Path.Combine(Application.persistentDataPath, "messenger_save.json");
-        LoadGame(); 
-
+        LoadGame();
         Debug.Log($"[System] Core system startup. Current language.:{CurrentSave.languageCode}");
     }
-
     public void SaveGame()
     {
         string json = JsonUtility.ToJson(CurrentSave, true);
@@ -65,7 +76,6 @@ public class GameSystem : MonoBehaviour
 
     IEnumerator PostDataCoroutine(string choiceID)
     {
-        // URL TBD
         string url = "https://";
         ObservationLog log = new ObservationLog();
         log.userId = SystemInfo.deviceUniqueIdentifier; 
@@ -103,8 +113,6 @@ public class GameSystem : MonoBehaviour
     {
         return "L10N_" + key;
     }
-    [Header("Audio")]
-    public AudioSource bgmSource;
     public void SetMusicVolume(float volume)
     {
         if (bgmSource != null)

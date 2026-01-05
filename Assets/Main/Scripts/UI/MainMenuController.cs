@@ -9,81 +9,104 @@ public class MainMenuController : MonoBehaviour
     public GameObject panelMenu;
     public GameObject panelSettings;
     public TMP_Dropdown langDropdown;
-    [Header("components")]
-    public TMP_Dropdown resDropdown;    
-    public Toggle windowedToggle;       
-    public Slider musicSlider;          
-    public Slider sfxSlider;            
+    public TMP_Dropdown resDropdown;
+    public Toggle windowedToggle;
+    public Toggle skipUnreadToggle;
+    public Slider musicSlider;
+    public Slider sfxSlider;
     public Slider textSpeedSlider;
-    public AudioSource bgmSource;
+    public Slider fontSizeSlider;
+    public TextMeshProUGUI speedPreviewText;
+    public TextMeshProUGUI sizePreviewText;
 
     private Resolution[] resolutions;
+
+    public static System.Action<float> OnFontSizeChanged;
+
+    private Coroutine _typingCoroutine;
+    private string _previewContent = "Hmm... is it heads or tails this time? I am not sure....";
 
     void Start()
     {
         ShowMenu();
         InitSettingsUI();
-        string savedLang = PlayerPrefs.GetString("SelectedLanguage", "EN");
         if (langDropdown != null)
         {
             langDropdown.onValueChanged.AddListener(OnLanguageChanged);
-        }
-        IEnumerator FadeInBGM(float targetVolume, float duration)
-        {
-            bgmSource.volume = 0;
-            float savedVolume = PlayerPrefs.GetFloat("MusicVol", 0.75f);
-            if (bgmSource != null)
-            {
-                bgmSource.volume = savedVolume;
-            }
-            float timer = 0;
-            while (timer < duration)
-            {
-                timer += Time.deltaTime;
-                bgmSource.volume = Mathf.Lerp(0, targetVolume, timer / duration);
-                yield return null;
-            }
+            string savedLang = PlayerPrefs.GetString("SelectedLanguage", "EN");
         }
     }
+
     void InitSettingsUI()
     {
         Vector2Int[] targetRes = new Vector2Int[]
-    {
-        new Vector2Int(3840, 2160), // 4K
-        new Vector2Int(2560, 1440), // 2K
-        new Vector2Int(1920, 1080), // 1080P
-        new Vector2Int(1600, 900),  // 900P
-        new Vector2Int(1280, 720)   // 720P
-    };
-        resDropdown.ClearOptions();
-        List<string> options = new List<string>();
-        int currentResIndex = 2;
-        List<Resolution> customResList = new List<Resolution>(); for (int i = 0; i < targetRes.Length; i++)
         {
-            options.Add(targetRes[i].x + " x " + targetRes[i].y);
-            Resolution r = new Resolution();
-            r.width = targetRes[i].x;
-            r.height = targetRes[i].y;
-            customResList.Add(r);
-            if (Screen.width == targetRes[i].x && Screen.height == targetRes[i].y)
+            new Vector2Int(3840, 2160),
+            new Vector2Int(2560, 1440),
+            new Vector2Int(1920, 1080),
+            new Vector2Int(1600, 900),
+            new Vector2Int(1280, 720)
+        };
+
+        if (resDropdown != null)
+        {
+            resDropdown.ClearOptions();
+            List<string> options = new List<string>();
+            int currentResIndex = 2;
+            List<Resolution> customResList = new List<Resolution>();
+
+            for (int i = 0; i < targetRes.Length; i++)
             {
-                currentResIndex = i;
+                options.Add(targetRes[i].x + " x " + targetRes[i].y);
+                Resolution r = new Resolution();
+                r.width = targetRes[i].x;
+                r.height = targetRes[i].y;
+                customResList.Add(r);
+                if (Screen.width == targetRes[i].x && Screen.height == targetRes[i].y)
+                {
+                    currentResIndex = i;
+                }
+            }
+            resolutions = customResList.ToArray();
+            resDropdown.AddOptions(options);
+            resDropdown.value = currentResIndex;
+            resDropdown.RefreshShownValue();
+        }
+
+        if (windowedToggle != null) windowedToggle.isOn = !Screen.fullScreen;
+        if (musicSlider != null)
+        {
+            float savedVol = PlayerPrefs.GetFloat("MusicVol", 0.75f);
+            musicSlider.value = savedVol;
+            if (GameSystem.Instance != null)
+            {
+                GameSystem.Instance.SetMusicVolume(savedVol);
             }
         }
-        resolutions = customResList.ToArray();
 
-        resDropdown.AddOptions(options);
-        resDropdown.value = currentResIndex;
-        resDropdown.RefreshShownValue();
+        if (sfxSlider != null) sfxSlider.value = PlayerPrefs.GetFloat("SFXVol", 0.75f);
+        if (textSpeedSlider != null)
+        {
+            int savedLevel = PlayerPrefs.GetInt("TextSpeedLevel", 1);
+            textSpeedSlider.value = savedLevel;
+        }
+        if (skipUnreadToggle != null)
+        {
+            skipUnreadToggle.isOn = PlayerPrefs.GetInt("SkipUnread", 0) == 1;
+        }
 
-        windowedToggle.isOn = !Screen.fullScreen;
-
-        musicSlider.value = PlayerPrefs.GetFloat("MusicVol", 0.75f);
-        sfxSlider.value = PlayerPrefs.GetFloat("SFXVol", 0.75f);
-        textSpeedSlider.value = PlayerPrefs.GetFloat("TextSpeed", 1.0f);
+        if (fontSizeSlider != null)
+        {
+            fontSizeSlider.minValue = 0;
+            fontSizeSlider.maxValue = 2;
+            fontSizeSlider.wholeNumbers = true;
+            fontSizeSlider.value = PlayerPrefs.GetInt("FontSizeLevel", 1);
+        }
     }
+
     public void SetResolution(int index)
     {
+        if (resolutions == null || index < 0 || index >= resolutions.Length) return;
         Resolution res = resolutions[index];
         Screen.SetResolution(res.width, res.height, Screen.fullScreen);
     }
@@ -97,11 +120,12 @@ public class MainMenuController : MonoBehaviour
     public void SetMusicVolume(float val)
     {
         PlayerPrefs.SetFloat("MusicVol", val);
-        if (GameSystem.Instance != null && GameSystem.Instance.bgmSource != null)
+        if (GameSystem.Instance != null)
         {
-            GameSystem.Instance.bgmSource.volume = val;
+            GameSystem.Instance.SetMusicVolume(val);
         }
     }
+
     public void SetSFXVolume(float val)
     {
         PlayerPrefs.SetFloat("SFXVol", val);
@@ -109,9 +133,89 @@ public class MainMenuController : MonoBehaviour
 
     public void SetTextSpeed(float val)
     {
-        PlayerPrefs.SetFloat("TextSpeed", val);
+        int level = Mathf.RoundToInt(val);
+        float actualSpeed = 1.0f;
+        float charDelay = 0.05f;
+
+        switch (level)
+        {
+            case 0:
+                actualSpeed = 0.5f;
+                charDelay = 0.1f;
+                break;
+            case 1:
+                actualSpeed = 1.0f;
+                charDelay = 0.05f;
+                break;
+            case 2:
+                actualSpeed = 2.0f;
+                charDelay = 0.02f;
+                break;
+        }
+
+        PlayerPrefs.SetInt("TextSpeedLevel", level);
+
+        if (speedPreviewText != null)
+        {
+            if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
+            _typingCoroutine = StartCoroutine(RunTypewriterEffect(charDelay));
+        }
+    }
+    IEnumerator RunTypewriterEffect(float delay)
+    {
+        speedPreviewText.text = "";
+        while (true)
+        {
+            foreach (char c in _previewContent)
+            {
+                speedPreviewText.text += c;
+                yield return new WaitForSeconds(delay);
+            }
+
+            yield return new WaitForSeconds(1.0f);
+            speedPreviewText.text = "";
+        }
     }
 
+    public void SetSkipUnread(bool isOn)
+    {
+        PlayerPrefs.SetInt("SkipUnread", isOn ? 1 : 0);
+        Debug.Log("SkipUnread: " + isOn);
+    }
+
+    public void SetFontSize(float val)
+    {
+        int level = Mathf.RoundToInt(val);
+        PlayerPrefs.SetInt("FontSizeLevel", level);
+
+        float scaleFactor = 1.0f;
+        float previewSize = 45f;
+
+        switch (level)
+        {
+            case 0:
+                scaleFactor = 0.9f;
+                previewSize = 40f;
+                break;
+            case 1:
+                scaleFactor = 1.0f;
+                previewSize = 45f;
+                break;
+            case 2:
+                scaleFactor = 1.1f;
+                previewSize = 50f;
+                break;
+        }
+
+        PlayerPrefs.SetFloat("FontScale", scaleFactor);
+
+        if (sizePreviewText != null)
+        {
+            sizePreviewText.fontSize = previewSize;
+        }
+
+        if (OnFontSizeChanged != null) OnFontSizeChanged.Invoke(scaleFactor);
+    }
     void ShowMenu()
     {
         if (panelMenu != null) panelMenu.SetActive(true);
@@ -129,20 +233,20 @@ public class MainMenuController : MonoBehaviour
         if (panelMenu != null) panelMenu.SetActive(false);
         if (panelSettings != null) panelSettings.SetActive(true);
     }
+
     public void OnBtnQuitClick()
     {
         Debug.Log("exiting.....");
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        #else
+#else
         Application.Quit();
-        #endif
-
+#endif
     }
 
     public void OnBtnCloseSettingsClick()
     {
-        ShowMenu(); 
+        ShowMenu();
     }
 
     public void OnLanguageChanged(int index)
@@ -169,33 +273,37 @@ public class MainMenuController : MonoBehaviour
             }
         }
     }
+
     public void OnBtnDonationClick()
     {
         Application.OpenURL("https://space.bilibili.com/9039940");
-
-    }
-}
-
-public class UISmoothPopup : MonoBehaviour
-{
-    public CanvasGroup canvasGroup; 
-    public float speed = 5f;
-    private bool _isOpening = false;
-
-    void OnEnable()
-    {
-        canvasGroup.alpha = 0f;
-        transform.localScale = Vector3.one * 0.9f; 
-        _isOpening = true;
     }
 
-    void Update()
+
+    public class UISmoothPopup : MonoBehaviour
     {
-        if (_isOpening)
+        public CanvasGroup canvasGroup;
+        public float speed = 5f;
+        private bool _isOpening = false;
+
+        void OnEnable()
         {
-            canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, 1f, Time.deltaTime * speed);
-            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one, Time.deltaTime * speed);
-            if (canvasGroup.alpha >= 1f) _isOpening = false;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0f;
+                transform.localScale = Vector3.one * 0.9f;
+                _isOpening = true;
+            }
+        }
+
+        void Update()
+        {
+            if (_isOpening && canvasGroup != null)
+            {
+                canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, 1f, Time.deltaTime * speed);
+                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one, Time.deltaTime * speed);
+                if (canvasGroup.alpha >= 1f) _isOpening = false;
+            }
         }
     }
 }
