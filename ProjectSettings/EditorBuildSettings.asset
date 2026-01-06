@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/Main/Scripts/UI/MainMenu/MainMenu.unity
     guid: a83fad1f33f25d249817eefb96f4685a
   - enabled: 1
-    path: Assets/Scenes/GameScene.unity
+    path: Assets/Scenes/Meeting_TemplateScene.unity
     guid: 9818b90e0f405594f97acc66193e4da3
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

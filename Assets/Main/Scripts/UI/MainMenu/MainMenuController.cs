@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -45,13 +45,19 @@ public class MainMenuController : MonoBehaviour
     }
     void CheckContinueButton()
     {
-        if (btnContinue != null)
+        bool hasSave = false;
+        if (GameSystem.Instance != null)
         {
-            bool hasSave = (GameSystem.Instance != null && GameSystem.Instance.HasAnySaveFile());
-            btnContinue.interactable = hasSave;
-            var text = btnContinue.GetComponentInChildren<TextMeshProUGUI>();
-            if (text != null) text.alpha = hasSave ? 1f : 0.5f;
+            hasSave = GameSystem.Instance.HasAnySaveFile();
         }
+        btnContinue.interactable = hasSave;
+        var text = btnContinue.GetComponentInChildren<TextMeshProUGUI>();
+        if (text != null)
+        {
+            text.alpha = hasSave ? 1f : 0.5f;
+        }
+
+        Debug.Log($"save status: {hasSave}, : {(hasSave ? "light" : "grey")}");
     }
     public void OnBtnContinueClick()
     {

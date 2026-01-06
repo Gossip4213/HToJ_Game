@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.IO;
 using System.Collections;
 using UnityEngine.Networking;
@@ -62,14 +62,23 @@ public class GameSystem : MonoBehaviour
     }
     public bool HasAnySaveFile()
     {
+        Debug.Log("searching saves");
         for (int i = 0; i < 6; i++)
         {
-            if (HasSaveFile(i))
+            string path = GetSavePath(i);
+            bool exists = File.Exists(path);
+            if (exists)
             {
-                return true; 
+                Debug.Log($"slot found{i} | path: {path}");
+                return true;
+            }
+            else
+            {
+                if (i == 0) Debug.Log($"slot 0 empty | path: {path}");
             }
         }
-        return false; 
+        Debug.Log("no save");
+        return false;
     }
     public PlayerSaveProfile GetSaveProfile(int slotIndex)
     {
