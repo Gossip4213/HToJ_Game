@@ -3,7 +3,7 @@
 ![Language](https://img.shields.io/badge/Language-C%23-blue?style=flat&logo=csharp)
 ![Status](https://img.shields.io/badge/Status-Prototype-orange?style=flat)
 > A scalable, data-driven Visual Novel (AVG) framework developed in Unity & C#. Designed as a potential platform for behavioral data collection and decision-making analysis.
-
+> *Screenshot coming soon...*
 
 ## 📖 Introduction
 
@@ -31,13 +31,21 @@ While presented as a Visual Novel, the underlying architecture is engineered to 
 ## Showcase
 
 ### 1. Dialogue & Portrait System
+> *Screenshot coming soon...*
 Dynamic character highlighting and typewriter text effects ensure an immersive reading experience.
 
 ### 2. Decision Making (The "Thought Bubbles")
+> *Screenshot coming soon...*
 Interactive choice generation with hover animations (scaling/rotation) to enhance user engagement during critical decision points.
 
 ### 3. Save/Load Architecture
+> *Screenshot coming soon...*
 A visualized interface for managing local persistence data across multiple slots.
+
+## 👤 Author
+**Xinbo Gao**
+* MScR Neuroscience Student @ University of Edinburgh
+* Focus: Computational Neuroscience, Neural Dynamics
 
 ## 📂 Project Structure
 
@@ -51,3 +59,4 @@ Assets/Main/
 ├── Resources/
 │   └── Cases/          # Narrative Data Files
 └── Prefabs/            # UI & Object Prefabs
+
