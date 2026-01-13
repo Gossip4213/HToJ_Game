@@ -1,4 +1,7 @@
 # Heads, Tails, or Justice? (HToJ)
+![Unity](https://img.shields.io/badge/Unity-6.0-black?style=flat&logo=unity)
+![Language](https://img.shields.io/badge/Language-C%23-blue?style=flat&logo=csharp)
+![Status](https://img.shields.io/badge/Status-Prototype-orange?style=flat)
 > A scalable, data-driven Visual Novel (AVG) framework developed in Unity & C#. Designed as a potential platform for behavioral data collection and decision-making analysis.
 
 
