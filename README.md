@@ -1,4 +1,4 @@
-# Heads, Tails, or Justice? (HToJ)
+<img width="1516" height="855" alt="Main-UI showcase" src="https://github.com/user-attachments/assets/ca116a02-48c3-4a98-a17b-b1a0096656c6" /># Heads, Tails, or Justice? (HToJ)
 ![Unity](https://img.shields.io/badge/Unity-6.0-black?style=flat&logo=unity)
 ![Language](https://img.shields.io/badge/Language-C%23-blue?style=flat&logo=csharp)
 ![Status](https://img.shields.io/badge/Status-Prototype-orange?style=flat)
@@ -30,22 +30,24 @@ While presented as a Visual Novel, the underlying architecture is engineered to 
 
 ## Showcase
 
-### 1. Dialogue & Portrait System
-> *Screenshot coming soon...*
-Dynamic character highlighting and typewriter text effects ensure an immersive reading experience.
+### 1. Main-UI
 
-### 2. Decision Making (The "Thought Bubbles")
-> *Screenshot coming soon...*
-Interactive choice generation with hover animations (scaling/rotation) to enhance user engagement during critical decision points.
+<img width="1516" height="855" alt="Main-UI showcase" src="https://github.com/user-attachments/assets/ec4e1086-2988-416e-b532-c167c426bd5d" />
+A fantasy-themed, anime UI designed to set an immersive tone for the visual novel and the data-collection framework.
+
+### 2. Settings-UI
+<img width="1916" height="1079" alt="settings-UI showcase" src="https://github.com/user-attachments/assets/687005ce-58a4-4c8e-b162-a698cc5e48bd" />
+Game-setting options allow users to adjust resolution, audio levels, and text playback speed. 
+These features ensure accessibility and accommodate individual participant reading preferences during experimental sessions.
 
 ### 3. Save/Load Architecture
-> *Screenshot coming soon...*
+<img width="1917" height="1076" alt="S L-UI showcase" src="https://github.com/user-attachments/assets/049b01ae-5734-4e5e-942e-126928b2d994" />
 A visualized interface for managing local persistence data across multiple slots.
 
 ## 👤 Author
 **Xinbo Gao**
 * MScR Neuroscience Student @ University of Edinburgh
-* Focus: Computational Neuroscience, Neural Dynamics
+* Focus: Computational Neuroscience, Neural Dynamics, decision-making
 
 ## 📂 Project Structure
 
