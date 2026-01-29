@@ -60,7 +60,7 @@ A visualized save&load system for local data and game progress.
 ## 👤 Author
 
 **Xinbo Gao**
-
+(Gossip4213)
 * MScR Neuroscience Student @ University of Edinburgh
 
 * Focus: Computational Neuroscience, Neural Dynamics, Decision-making, Moral decision, multi-languages cognition.
