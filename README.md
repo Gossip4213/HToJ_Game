@@ -1,64 +1,80 @@
-<img width="1516" height="855" alt="Main-UI showcase" src="https://github.com/user-attachments/assets/ca116a02-48c3-4a98-a17b-b1a0096656c6" /># Heads, Tails, or Justice? (HToJ)
-![Unity](https://img.shields.io/badge/Unity-6.0-black?style=flat&logo=unity)
+# Heads, Tails, or Justice? (HToJ)
+
+![Unity](https://img.shields.io/badge/Unity-2022_LTS-black?style=flat&logo=unity)
 ![Language](https://img.shields.io/badge/Language-C%23-blue?style=flat&logo=csharp)
-![Status](https://img.shields.io/badge/Status-Prototype-orange?style=flat)
-> A scalable, data-driven Visual Novel (AVG) framework developed in Unity & C#. Designed as a potential platform for behavioral data collection and decision-making analysis.
-> *Screenshot coming soon...*
+![Narrative](https://img.shields.io/badge/Engine-Ink-ff69b4?style=flat)
+![Status](https://img.shields.io/badge/Status-In_Development-orange?style=flat)
+
+> A scalable, hybrid-architecture Visual Novel framework developed in Unity.
+> Designed to explore the intersection of **interactive narrative**, **moral decision-making**, and **behavioral data collection**.
+
+<div align="center">
+<img width="100%" alt="Main-UI showcase" src="https://github.com/user-attachments/assets/ca116a02-48c3-4a98-a17b-b1a0096656c6" />
+</div>
 
 ## 📖 Introduction
 
-**HToJ** is an independent development project exploring the intersection of interactive narrative and behavioral data tracking. Built on the **Unity Engine**, this framework provides a robust architecture for non-linear storytelling, featuring a custom serialization system, decoupled UI events, and a modular narrative configuration pipeline.
+**HToJ** is a research-oriented development project. While presented as a fantasy visual novel, its underlying architecture is engineered as a **psychological experimental platform**.
 
-While presented as a Visual Novel, the underlying architecture is engineered to serve as a **psychological experimental platform**, capable of presenting complex scenarios and logging detailed user decision metrics.
+The project adopts a **Hybrid Narrative Architecture**, combining the **Ink** language for fluid branching storytelling with Unity's native **ScriptableObjects** for handling complex, high-stakes moral decision events ("Cases"). This allows for decoupled tracking of narrative flow and quantitative behavioral metrics.
 
-## Features
+## 🛠️ Technical Features
 
-* **Data-Driven Narrative Engine**: Utilizes **ScriptableObjects** (`CaseData`) to decouple story content from game logic, allowing for rapid iteration of experimental scenarios without recompiling code.
-* **Robust Persistence System**: Features a custom **JSON-based multi-slot save/load system** built on `System.IO`, managing complex game states including timestamps, chapter progress, and decision history.
-* **Reactive UI & Dialogue System**: 
-    * Asynchronous typewriter effects using **Coroutines**.
-    * Dynamic portrait management with state-based highlighting.
-    * "Thought Bubble" choice system with physics-based hover feedback.
-* **Decoupled Architecture**: Implements **Singleton** managers (`GameSystem`) and **C# Actions/Delegates** to minimize dependencies between the logic layer and presentation layer.
+### 1. The "Hybrid" Narrative Engine
+* **Ink Integration**: Utilizes the **Ink** language (by Inkle Studios) to manage the linear narrative flow, branching dialogue, and variable tracking. This separates story content from game logic, preventing "spaghetti code."
+* **Case System (ScriptableObjects)**: Complex moral dilemmas are encapsulated as Unity `ScriptableObjects`. Ink triggers these "Cases" via Tags, handing control over to a specialized UI for weighing evidence and making judgments.
 
-## Tech Stack
+### 2. Scalable Systems
+* **Custom Localization (L10N)**: A lightweight, JSON-based localization system. Supports dynamic language switching (ZH/EN/JP) at runtime without scene reloading, utilizing C# Actions/Delegates for observer-pattern UI updates.
+* **Robust Persistence**: A custom `System.IO` based save/load system. Serializes complex game states—including Ink variables, chapter progress, and decision history—into local JSON files.
 
-* **Engine**: Unity 6.0
-* **Language**: C# (.NET Standard 2.1)
-* **Serialization**: `UnityEngine.JsonUtility` & `System.IO`
-* **UI System**: Unity UGUI & TextMeshPro (TMP)
+### 3. AI-Assisted Asset Pipeline
+This project leverages generative AI to optimize the solo-developer workflow:
+* **Visual Arts**: **Stable Diffusion** for character design and environment conceptualization.
+* **Voice Acting**: **VVC (Voice Changer)** technology to generate character voices.
 
-## Showcase
+## 💻 Tech 
 
-### 1. Main-UI
+| Category | Technology | Usage |
+| :--- | :--- | :--- |
+| **Engine** | Unity 2022 LTS | Core Framework |
+| **Language** | C# (.NET Standard 2.1) | Game Logic, Custom Systems |
+| **Narrative** | **Ink** & Ink-Unity Integration | Dialogue Flow & Logic |
+| **Data** | JSON / ScriptableObject | Localization, Save Data, Game Config |
+| **UI** | UGUI & TextMeshPro | Interface & Layout |
 
-<img width="1516" height="855" alt="Main-UI showcase" src="https://github.com/user-attachments/assets/ec4e1086-2988-416e-b532-c167c426bd5d" />
+## 📸 Showcase
+
+### Main Menu
+<img width="100%" alt="Main-UI showcase" src="https://github.com/user-attachments/assets/ec4e1086-2988-416e-b532-c167c426bd5d" />
 A fantasy-themed, anime UI designed to set an immersive tone for the visual novel and the data-collection framework.
 
-### 2. Settings-UI
-<img width="1916" height="1079" alt="settings-UI showcase" src="https://github.com/user-attachments/assets/687005ce-58a4-4c8e-b162-a698cc5e48bd" />
-Game-setting options allow users to adjust resolution, audio levels, and text playback speed. 
-These features ensure accessibility and accommodate individual participant reading preferences during experimental sessions.
+### Settings Interface
+<img width="100%" alt="settings-UI showcase" src="https://github.com/user-attachments/assets/687005ce-58a4-4c8e-b162-a698cc5e48bd" />
+Allows adjustment of resolution, audio, and text speed to accommodate participant preferences.
 
-### 3. Save/Load Architecture
-<img width="1917" height="1076" alt="S L-UI showcase" src="https://github.com/user-attachments/assets/049b01ae-5734-4e5e-942e-126928b2d994" />
-A visualized interface for managing local persistence data across multiple slots.
+### Save&Load  
+<img width="100%" alt="S L-UI showcase" src="https://github.com/user-attachments/assets/049b01ae-5734-4e5e-942e-126928b2d994" />
+A visualized save&load system for local data and game progress.
 
 ## 👤 Author
+
 **Xinbo Gao**
+(Gossip4213)
 * MScR Neuroscience Student @ University of Edinburgh
-* Focus: Computational Neuroscience, Neural Dynamics, decision-making
+
+* Focus: Computational Neuroscience, Neural Dynamics, Decision-making, Moral decision, multi-languages cognition.
 
 ## 📂 Project Structure
 
 ```text
-Assets/Main/
-├── Scripts/
-│   ├── Core/           # Core Systems (GameSystem.cs, SaveData.cs)
-│   ├── UI/             # UI Logic (MainMenu, SaveLoadUI, ButtonEffects)
-│   ├── Gameplay/       # Game Logic (DialogueController, ChoiceManager)
-│   └── Data/           # ScriptableObject Definitions (CaseData, Options)
-├── Resources/
-│   └── Cases/          # Narrative Data Files
-└── Prefabs/            # UI & Object Prefabs
-
+Assets/
+├── Main/
+│   ├── Scripts/
+│   │   ├── Core/           # GameSystem (Singleton), LocalizationManager
+│   │   ├── Gameplay/       # DialogueController (Ink Bridge), ChoiceManager
+│   │   ├── UI/             # LocalizeUI, Menus
+│   │   └── Data/           # PlayerProfile, JSON Data Structures
+│   ├── Story/              # .ink files and compiled JSON assets
+│   └── Resources/          # ScriptableObjects (Cases) & Audio
+└── StreamingAssets/        # localization.json (Hot-swappable text)
