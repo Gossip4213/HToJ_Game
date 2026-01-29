@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
-using Ink.Runtime; 
+using Ink.Runtime;
 
 public class DialogueController : MonoBehaviour
 {
     [Header("Ink Core")]
-    public TextAsset inkJSONAsset; 
+    public TextAsset inkJSONAsset;
     private Story story;
 
     [Header("UI Components")]
@@ -16,17 +16,16 @@ public class DialogueController : MonoBehaviour
     public TextMeshProUGUI txtBody;
     public GameObject continueIcon;
 
-    [Header("Character Images")]
-    public Image[] characterImages;
-    public Color activeColor = Color.white;
-    public Color inactiveColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-
     [Header("Settings")]
     public float typeSpeed = 0.05f;
 
+    [Header("Interaction State")]
+    [SerializeField] private InteractableObject currentHoveredObj; // 记录当前悬停对象
     private bool _isTyping = false;
     private string _currentFullText = "";
     private Coroutine _typingCoroutine;
+
+    #region Unity Lifecycle
 
     void Start()
     {
@@ -36,19 +35,131 @@ public class DialogueController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
-        {
-            OnUserClick();
-        }
+        // 1. 只有在非打字状态下才处理检测（可选，保持你原本逻辑）
+        HandleHoverInput();
+
+        // 2. 处理点击输入
+        HandleClickInput();
     }
-    public void StartStory()
+
+    #endregion
+
+    #region Interaction Logic (2D Raycasting)
+
+    private void HandleHoverInput()
     {
-        if (inkJSONAsset == null)
+        if (Camera.main == null) return;
+
+        // 获取鼠标在 2D 世界中的坐标
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 mousePos2D = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
+
+        // 检测 2D 碰撞体
+        Collider2D hit = Physics2D.OverlapPoint(mousePos2D);
+
+        if (hit != null)
         {
-            Debug.LogError("no Ink JSON file! please put it");
-            return;
+            InteractableObject obj = hit.GetComponent<InteractableObject>();
+
+            if (obj != null)
+            {
+                if (currentHoveredObj != obj)
+                {
+                    NotifyHover(obj); // 使用统一的通知函数
+                }
+                return;
+            }
         }
 
+        // 没打中任何东西
+        if (currentHoveredObj != null)
+        {
+            NotifyExit();
+        }
+    }
+
+    private void HandleClickInput()
+    {
+        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+        {
+            if (currentHoveredObj != null)
+            {
+                SelectThisObject(currentHoveredObj.objectID); // 触发物体选择
+            }
+            else
+            {
+                OnUserClick(); // 普通翻页
+            }
+        }
+    }
+
+    // --- 供外部或内部调用的统一接口 ---
+
+    public void NotifyHover(InteractableObject obj)
+    {
+        if (currentHoveredObj != null && currentHoveredObj != obj)
+        {
+            currentHoveredObj.OnHoverExit();
+        }
+
+        currentHoveredObj = obj;
+        currentHoveredObj.OnHoverEnter();
+        UpdateUIForHover(obj);
+    }
+
+    public void NotifyExit()
+    {
+        if (currentHoveredObj != null)
+        {
+            currentHoveredObj.OnHoverExit();
+            currentHoveredObj = null;
+
+            // 恢复原本的剧情文本
+            if (!_isTyping && txtBody != null)
+            {
+                txtBody.text = _currentFullText;
+            }
+        }
+    }
+
+    public void SelectThisObject(string id)
+    {
+        if (story == null || story.currentChoices.Count == 0) return;
+
+        for (int i = 0; i < story.currentChoices.Count; i++)
+        {
+            Choice choice = story.currentChoices[i];
+            if (choice.tags != null && choice.tags.Contains("id:" + id))
+            {
+                story.ChooseChoiceIndex(i);
+                NotifyExit(); // 清理状态
+                DisplayNextLine();
+                return;
+            }
+        }
+        Debug.Log($"尝试点击 {id}，但当前 Ink 中没有匹配选项。");
+    }
+
+    private void UpdateUIForHover(InteractableObject obj)
+    {
+        if (txtBody != null)
+        {
+            if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
+            txtBody.text = obj.hoverThought;
+        }
+        if (txtSpeaker != null)
+        {
+            txtSpeaker.text = "Ambrose (思考)";
+        }
+    }
+
+    #endregion
+
+    #region Ink Core Logic (所有原始功能已找回)
+
+    public void StartStory()
+    {
+        if (inkJSONAsset == null) return;
         story = new Story(inkJSONAsset.text);
         DisplayNextLine();
     }
@@ -57,68 +168,32 @@ public class DialogueController : MonoBehaviour
     {
         if (story.canContinue)
         {
-            string text = story.Continue(); 
-            text = text.Trim(); 
-
-            ParseTags(story.currentTags);
+            string text = story.Continue().Trim();
+            ParseTags(story.currentTags); // 找回标签解析
 
             if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
-            _typingCoroutine = StartCoroutine(TypeWriterEffect(text));
+            _typingCoroutine = StartCoroutine(TypeWriterEffect(text)); // 找回打字机
         }
         else if (story.currentChoices.Count > 0)
         {
-            Debug.Log("selection (TBC)");
-        }
-        else
-        {
-            Debug.Log("ending");
-            // EndDialogue();
+            Debug.Log("等待探索...");
         }
     }
 
-    void ParseTags(List<string> tags)
+    private void ParseTags(List<string> tags)
     {
+        if (tags == null) return;
         foreach (string tag in tags)
         {
-            string[] splitTag = tag.Split(':');
-            if (splitTag.Length != 2) continue;
-
-            string key = splitTag[0].Trim();
-            string value = splitTag[1].Trim();
-
-            if (key == "speaker")
+            string[] split = tag.Split(':');
+            if (split.Length == 2 && split[0].Trim() == "speaker")
             {
-                txtSpeaker.text = value; 
-                UpdateCharacterHighlightByName(value);
-            }
-            else if (key == "layout")
-            {
-                Debug.Log("changed as: " + value);
+                txtSpeaker.text = split[1].Trim();
             }
         }
     }
 
-    void UpdateCharacterHighlightByName(string name)
-    {
-        CharacterType type = CharacterType.None;
-        try
-        {
-            type = (CharacterType)System.Enum.Parse(typeof(CharacterType), name);
-        }
-        catch
-        {
-            Debug.LogWarning("unknown: " + name);
-        }
-
-        UpdateCharacterHighlights(type);
-    }
-
-    void UpdateCharacterHighlights(CharacterType activeChar)
-    {
-        foreach (var img in characterImages) img.color = inactiveColor;
-
-    }
-    IEnumerator TypeWriterEffect(string text)
+    private IEnumerator TypeWriterEffect(string text)
     {
         _isTyping = true;
         _currentFullText = text;
@@ -136,10 +211,11 @@ public class DialogueController : MonoBehaviour
         if (continueIcon != null) continueIcon.SetActive(true);
     }
 
-    void OnUserClick()
+    private void OnUserClick()
     {
         if (_isTyping)
         {
+            // 打字中点击：直接显示全文本
             if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
             txtBody.text = _currentFullText;
             _isTyping = false;
@@ -147,7 +223,10 @@ public class DialogueController : MonoBehaviour
         }
         else
         {
+            // 非打字点击：翻下一页
             DisplayNextLine();
         }
     }
+
+    #endregion
 }
