@@ -4,44 +4,68 @@ using System.Collections.Generic;
 public class LocalizationManager : MonoBehaviour
 {
     public static LocalizationManager Instance;
+
+    public string currentLanguage = "EN";
+
     private Dictionary<string, Dictionary<string, string>> localizedText;
+
+    public delegate void OnLanguageChangeDelegate();
+    public event OnLanguageChangeDelegate OnLanguageChanged;
 
     void Awake()
     {
-        Instance = this;
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
         LoadLanguageData();
+
+        if (PlayerPrefs.HasKey("SelectedLanguage"))
+        {
+            currentLanguage = PlayerPrefs.GetString("SelectedLanguage");
+            Debug.Log("LocalizationManager: " + currentLanguage);
+        }
     }
 
     void LoadLanguageData()
     {
         localizedText = new Dictionary<string, Dictionary<string, string>>();
 
-        AddText("BTN_START", "开始推演", "開始推演", "Start Simulation", "シミュレーション開始");
-        AddText("BTN_SETTINGS", "研讨会设置", "研討會設置", "Settings", "設定");
-        AddText("BTN_QUIT", "离开", "離開", "Quit", "終了");
-        AddText("LBL_VOLUME", "音量", "音量", "Volume", "音量");
+
+        AddText("BTN_SET", "Settings", "设置");
+        AddText("BTN_QUIT", "Exit", "退出");
+        AddText("BTN_START", "Start", "开始游戏");
+        AddText("BTN_CON", "Continue", "继续游戏");
+        AddText("TITLE", "Heads, Tails, or Justice?", "Heads, Tails, or Justice?");
     }
 
-    void AddText(string key, string cn, string tw, string en, string jp)
+    void AddText(string key, string en, string cn)
     {
         var dict = new Dictionary<string, string>();
         dict["ZH_CN"] = cn;
-        dict["ZH_TW"] = tw;
         dict["EN"] = en;
-        dict["JP"] = jp;
+        // dict["JP"] = jp; // 
         localizedText[key] = dict;
     }
 
     public string GetText(string key)
     {
-        if (!localizedText.ContainsKey(key)) return key; 
 
-        string currentLang = GameSystem.Instance.CurrentSave.languageCode;
-
-        if (localizedText[key].ContainsKey(currentLang))
+        if (!localizedText.ContainsKey(key))
         {
-            return localizedText[key][currentLang];
+            return key;
         }
-        return localizedText[key]["EN"]; 
+
+        if (localizedText[key].ContainsKey(currentLanguage))
+        {
+            return localizedText[key][currentLanguage];
+        }
+
+        return localizedText[key]["EN"];
+    }
+
+    public void ChangeLanguage(string newLang)
+    {
+        currentLanguage = newLang;
+        if (OnLanguageChanged != null) OnLanguageChanged();
     }
 }

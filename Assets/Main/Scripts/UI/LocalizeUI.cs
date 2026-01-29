@@ -1,24 +1,30 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro; 
+using TMPro;
 
 public class LocalizeUI : MonoBehaviour
 {
-    public string key; 
+    public string key;
+
     private TextMeshProUGUI tmpText;
 
     void Start()
     {
         tmpText = GetComponent<TextMeshProUGUI>();
+
         UpdateText();
 
-        GameSystem.Instance.OnLanguageChanged += UpdateText;
+        if (LocalizationManager.Instance != null)
+        {
+            LocalizationManager.Instance.OnLanguageChanged += UpdateText;
+        }
     }
 
     void OnDestroy()
     {
-        if (GameSystem.Instance != null)
-            GameSystem.Instance.OnLanguageChanged -= UpdateText;
+        if (LocalizationManager.Instance != null)
+        {
+            LocalizationManager.Instance.OnLanguageChanged -= UpdateText;
+        }
     }
 
     void UpdateText()

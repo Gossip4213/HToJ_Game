@@ -284,23 +284,18 @@ public class MainMenuController : MonoBehaviour
         string code = "EN";
         switch (index)
         {
-            case 0: code = "ZH_CN"; break;
-            case 1: code = "KR"; break;
-            case 2: code = "EN"; break;
-            case 3: code = "JP"; break;
+            case 0: code = "EN"; break; 
+            case 1: code = "ZH_CN"; break; 
+            case 2: code = "JP"; break; 
+            case 3: code = "KR"; break;
         }
 
         PlayerPrefs.SetString("SelectedLanguage", code);
         PlayerPrefs.Save();
 
-        if (GameSystem.Instance != null)
+        if (LocalizationManager.Instance != null)
         {
-            GameSystem.Instance.SwitchLanguage(code);
-            var allLocalizers = Object.FindObjectsByType<LocalizeText>(FindObjectsSortMode.None);
-            foreach (var localizer in allLocalizers)
-            {
-                localizer.RefreshText();
-            }
+            LocalizationManager.Instance.ChangeLanguage(code);
         }
     }
 

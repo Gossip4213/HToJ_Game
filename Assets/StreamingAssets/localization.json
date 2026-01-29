@@ -1,0 +1,31 @@
+{
+  "items": [
+    {
+      "key": "L10N_BTN_START",
+      "en": "Start",
+      "zh": "开始游戏",
+      "kr": "Start",
+      "jp": "开始游戏"
+    },
+    {
+      "key": "L10N_BTN_CONTINUE",
+      "en": "Continue",
+      "zh": "继续游戏"
+    },
+    {
+      "key": "L10N_BTN_SET",
+      "en": "Settings",
+      "zh": "设置"
+    },
+    {
+      "key": "L10N_BTN_QUIT",
+      "en": "Quit",
+      "zh": "离开"
+    },
+    {
+      "key": "L10N_TITLE",
+      "en": "Heads, Tails, or Justice?",
+      "zh": "硬币、审判与正义"
+    }
+  ]
+}
