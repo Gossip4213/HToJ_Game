@@ -568,7 +568,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e95a632b9ed2ca345917917088314ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  key: BTN_START
+  key: BTN_SET
 --- !u!114 &146713188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -811,7 +811,7 @@ GameObject:
   - component: {fileID: 159415830}
   - component: {fileID: 159415829}
   - component: {fileID: 159415831}
-  - component: {fileID: 159415832}
+  - component: {fileID: 159415833}
   m_Layer: 5
   m_Name: Btn_Start_text
   m_TagString: Untagged
@@ -952,7 +952,7 @@ MonoBehaviour:
   hoverColor: {r: 0.83137256, g: 0.6745098, b: 0.050980393, a: 1}
   moveDistance: 15
   animSpeed: 10
---- !u!114 &159415832
+--- !u!114 &159415833
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -961,10 +961,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 159415827}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f965910c94a7ba49b3a9c26b1e2269f, type: 3}
+  m_Script: {fileID: 11500000, guid: e95a632b9ed2ca345917917088314ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  localizationKey: BTN_START
+  key: BTN_START
 --- !u!1 &174556812
 GameObject:
   m_ObjectHideFlags: 0
@@ -2356,7 +2356,6 @@ GameObject:
   - component: {fileID: 345277111}
   - component: {fileID: 345277110}
   - component: {fileID: 345277109}
-  - component: {fileID: 345277108}
   m_Layer: 5
   m_Name: Btn_Start
   m_TagString: Untagged
@@ -2384,19 +2383,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 413.4465, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &345277108
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 345277106}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e95a632b9ed2ca345917917088314ea4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  key: BTN_START
 --- !u!114 &345277109
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6485,7 +6471,7 @@ GameObject:
   - component: {fileID: 1050436242}
   - component: {fileID: 1050436241}
   - component: {fileID: 1050436243}
-  - component: {fileID: 1050436244}
+  - component: {fileID: 1050436245}
   m_Layer: 5
   m_Name: Btn_Con_text
   m_TagString: Untagged
@@ -6626,7 +6612,7 @@ MonoBehaviour:
   hoverColor: {r: 0.18039216, g: 0.8, b: 0.44313726, a: 1}
   moveDistance: 15
   animSpeed: 10
---- !u!114 &1050436244
+--- !u!114 &1050436245
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6635,10 +6621,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1050436239}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f965910c94a7ba49b3a9c26b1e2269f, type: 3}
+  m_Script: {fileID: 11500000, guid: e95a632b9ed2ca345917917088314ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  localizationKey: BTN_CON
+  key: BTN_CON
 --- !u!1 &1051558361
 GameObject:
   m_ObjectHideFlags: 0
@@ -6870,6 +6856,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ebefa1821a458841b7d721b15dccc5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentLanguage: EN
 --- !u!114 &1097654521
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7968,7 +7955,7 @@ GameObject:
   - component: {fileID: 1326032224}
   - component: {fileID: 1326032223}
   - component: {fileID: 1326032225}
-  - component: {fileID: 1326032226}
+  - component: {fileID: 1326032227}
   m_Layer: 5
   m_Name: Btn_Set_text
   m_TagString: Untagged
@@ -8109,7 +8096,7 @@ MonoBehaviour:
   hoverColor: {r: 0.8509804, g: 0.1882353, b: 0.14509805, a: 1}
   moveDistance: 15
   animSpeed: 10
---- !u!114 &1326032226
+--- !u!114 &1326032227
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8118,10 +8105,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1326032221}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f965910c94a7ba49b3a9c26b1e2269f, type: 3}
+  m_Script: {fileID: 11500000, guid: e95a632b9ed2ca345917917088314ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  localizationKey: BTN_SET
+  key: BTN_SET
 --- !u!1 &1342331789
 GameObject:
   m_ObjectHideFlags: 0
@@ -11419,7 +11406,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e95a632b9ed2ca345917917088314ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  key: BTN_START
+  key: BTN_QUIT
 --- !u!114 &1810812152
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11566,7 +11553,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e95a632b9ed2ca345917917088314ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  key: BTN_START
+  key: BTN_CONTINUE
 --- !u!114 &1851543338
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12410,7 +12397,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1295530920}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1996339944
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12461,7 +12460,7 @@ GameObject:
   - component: {fileID: 2033127954}
   - component: {fileID: 2033127953}
   - component: {fileID: 2033127955}
-  - component: {fileID: 2033127956}
+  - component: {fileID: 2033127957}
   m_Layer: 5
   m_Name: Btn_Quit_text
   m_TagString: Untagged
@@ -12604,7 +12603,7 @@ MonoBehaviour:
   hoverColor: {r: 0, g: 0.5999999, b: 1, a: 1}
   moveDistance: 15
   animSpeed: 10
---- !u!114 &2033127956
+--- !u!114 &2033127957
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -12613,10 +12612,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 2033127951}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f965910c94a7ba49b3a9c26b1e2269f, type: 3}
+  m_Script: {fileID: 11500000, guid: e95a632b9ed2ca345917917088314ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  localizationKey: BTN_QUIT
+  key: BTN_QUIT
 --- !u!1 &2054150967
 GameObject:
   m_ObjectHideFlags: 0
