@@ -1,13 +1,24 @@
-// 定义变量
-VAR player_name = "Ambrose"
+-> explore_room_intro
 
-// 开始对话
-# speaker: Sera # layout: right
-嘿，{player_name}。你终于醒了。
+=== explore_room_intro ===
+Ambrose 站在房间里，回想着刚才发生的一切。
+现在的线索似乎都在这间屋子里了。
+（点击你感兴趣的物品...）
+-> explore_hub
 
-# speaker: Ambrose # layout: left
-这是哪里？我不记得之前发生了什么。
+=== explore_hub ===
 
-# speaker: Sera # layout: right
-别紧张。这是一个测试节点。
-只要你能看到这句话，说明你的 Ink 引擎已经完美启动了。
++ #id:Calligraphy [调查桌上的字帖] 
+    这是一本宋代苏轼的字帖，也是我的心头好。
+    看着这些灵动的笔触，我的心情平复了一些。
+    -> explore_hub 
+
++ #id:Pitchfork [看看墙上的农具] 
+    一把破旧的干草叉。
+    让我联想到了14世纪法国农民的悲惨生活，真是荒诞。
+    -> explore_hub 
+
++ #id:Mirror [照镜子] 
+    我看起来很憔悴，今天写代码实在是太累了。
+    -> explore_hub
+    

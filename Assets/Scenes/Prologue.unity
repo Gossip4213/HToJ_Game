@@ -130,7 +130,6 @@ GameObject:
   - component: {fileID: 113716542}
   - component: {fileID: 113716544}
   - component: {fileID: 113716543}
-  - component: {fileID: 113716546}
   m_Layer: 6
   m_Name: Seat_Miniel
   m_TagString: Untagged
@@ -154,8 +153,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -654, y: -58.51001}
-  m_SizeDelta: {x: 177.96191, y: 358.2481}
+  m_AnchoredPosition: {x: -406, y: -123.75}
+  m_SizeDelta: {x: 341.2349, y: 510.6362}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &113716543
 MonoBehaviour:
@@ -195,22 +194,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 113716541}
   m_CullTransparentMesh: 1
---- !u!114 &113716546
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 113716541}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc3d0589fb478ec45a8733d6328c80a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  objectID: Calligraphy
-  hoverThought: "\uFF08\u6709\u70B9\u773C\u719F....\uFF09"
-  highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
-  hoverScale: 1.05
 --- !u!1 &143831953
 GameObject:
   m_ObjectHideFlags: 0
@@ -663,14 +646,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d6713a5497c9e14ba9c4bd6d145ef18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inkJSON_EN: {fileID: 4900000, guid: 90f9f22e7324add45b9c41c481805401, type: 3}
-  inkJSON_ZH: {fileID: 4900000, guid: 90f9f22e7324add45b9c41c481805401, type: 3}
+  inkJSON_EN: {fileID: 4900000, guid: 0df3fc1c9d7251a4d90542d3494d8095, type: 3}
+  inkJSON_ZH: {fileID: 4900000, guid: a8a1c66e16f5d0f488b33482477e98f8, type: 3}
   choiceBubblePanel: {fileID: 1432540830}
   choiceButtons:
   - {fileID: 1131757005}
-  - {fileID: 337790898}
   - {fileID: 2025353048}
-  inkJSONAsset: {fileID: 4900000, guid: 90f9f22e7324add45b9c41c481805401, type: 3}
+  - {fileID: 337790898}
+  inkJSONAsset: {fileID: 4900000, guid: 985c88017d047964cb85c7eddc39a9cc, type: 3}
   txtSpeaker: {fileID: 1937512042}
   txtBody: {fileID: 924119130}
   continueIcon: {fileID: 206855583}
@@ -811,114 +794,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 758033786}
   m_CullTransparentMesh: 1
---- !u!1 &882321209
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 882321210}
-  - component: {fileID: 882321212}
-  - component: {fileID: 882321211}
-  - component: {fileID: 882321214}
-  - component: {fileID: 882321215}
-  m_Layer: 6
-  m_Name: Seat_Sera
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &882321210
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 882321209}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1090721899}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 35.984802, y: 212.91722}
-  m_SizeDelta: {x: 187.9532, y: 332.1756}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &882321211
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 882321209}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.7967327, g: 0.35983825, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &882321212
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 882321209}
-  m_CullTransparentMesh: 1
---- !u!114 &882321214
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 882321209}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e741851cba3ad425c91ecf922cc6b379, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _data:
-    _json: '{"declarations":{"Kind":"Object","collection":{"$content":[],"$version":"A"},"$version":"A"}}'
-    _objectReferences: []
---- !u!114 &882321215
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 882321209}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc3d0589fb478ec45a8733d6328c80a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  objectID: Mirror
-  hoverThought: 
-  highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
-  hoverScale: 1.05
 --- !u!1 &904697110
 GameObject:
   m_ObjectHideFlags: 0
@@ -976,7 +851,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u8FD9\u91CC\u662F\u5706\u684C\u4F1A\u8BAE\u73B0\u573A"
+  m_text: Prologue
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1222,9 +1097,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 113716542}
-  - {fileID: 1417831612}
-  - {fileID: 882321210}
-  - {fileID: 1555154115}
   - {fileID: 2062902363}
   m_Father: {fileID: 1544433953}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1731,98 +1603,6 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
---- !u!1 &1417831611
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1417831612}
-  - component: {fileID: 1417831614}
-  - component: {fileID: 1417831613}
-  - component: {fileID: 1417831615}
-  m_Layer: 6
-  m_Name: Seat_Kate
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1417831612
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417831611}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1090721899}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -344, y: 119.50006}
-  m_SizeDelta: {x: 173.53735, y: 354.84}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1417831613
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417831611}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.31862956, g: 0.9892183, b: 0.49860132, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1417831614
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417831611}
-  m_CullTransparentMesh: 1
---- !u!114 &1417831615
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417831611}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc3d0589fb478ec45a8733d6328c80a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  objectID: Pitchfork
-  hoverThought: 
-  highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
-  hoverScale: 1.05
 --- !u!1 &1432540830
 GameObject:
   m_ObjectHideFlags: 0
@@ -1965,98 +1745,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &1555154114
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1555154115}
-  - component: {fileID: 1555154117}
-  - component: {fileID: 1555154116}
-  - component: {fileID: 1555154118}
-  m_Layer: 6
-  m_Name: Sear_Adams
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1555154115
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1555154114}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1090721899}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 496, y: 119.5}
-  m_SizeDelta: {x: 177.97192, y: 354.84}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1555154116
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1555154114}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.332884, b: 0.332884, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1555154117
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1555154114}
-  m_CullTransparentMesh: 1
---- !u!114 &1555154118
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1555154114}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc3d0589fb478ec45a8733d6328c80a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  objectID: 
-  hoverThought: 
-  highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
-  hoverScale: 1.05
 --- !u!1 &1768323940
 GameObject:
   m_ObjectHideFlags: 0
@@ -2444,7 +2132,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0.586853, w: -0.27496338}
+  m_margin: {x: 0, y: 0, z: 0.58636475, w: -0.27496338}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -2590,7 +2278,6 @@ GameObject:
   - component: {fileID: 2062902363}
   - component: {fileID: 2062902365}
   - component: {fileID: 2062902364}
-  - component: {fileID: 2062902366}
   m_Layer: 6
   m_Name: Seat_Rumins
   m_TagString: Untagged
@@ -2614,8 +2301,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 780, y: -58.51001}
-  m_SizeDelta: {x: 177.96167, y: 358.25}
+  m_AnchoredPosition: {x: 521, y: -123.75}
+  m_SizeDelta: {x: 341.2346, y: 510.63}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2062902364
 MonoBehaviour:
@@ -2655,22 +2342,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2062902362}
   m_CullTransparentMesh: 1
---- !u!114 &2062902366
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2062902362}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc3d0589fb478ec45a8733d6328c80a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  objectID: 
-  hoverThought: 
-  highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
-  hoverScale: 1.05
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

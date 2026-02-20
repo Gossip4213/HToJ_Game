@@ -569,6 +569,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: BTN_SET
+  englishFont: {fileID: 0}
+  chineseFont: {fileID: 0}
 --- !u!114 &146713188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -861,7 +863,7 @@ MonoBehaviour:
   m_text: Start
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f71803b4ed3c417438825c3204ee7568, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: 981402214ad2af845b4bba0c9067066c, type: 2}
+  m_sharedMaterial: {fileID: 1491955986336758203, guid: f71803b4ed3c417438825c3204ee7568, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -965,6 +967,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: BTN_START
+  englishFont: {fileID: 0}
+  chineseFont: {fileID: 0}
 --- !u!1 &174556812
 GameObject:
   m_ObjectHideFlags: 0
@@ -6521,7 +6525,7 @@ MonoBehaviour:
   m_text: Continue
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f71803b4ed3c417438825c3204ee7568, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: 981402214ad2af845b4bba0c9067066c, type: 2}
+  m_sharedMaterial: {fileID: 1491955986336758203, guid: f71803b4ed3c417438825c3204ee7568, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -6625,6 +6629,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: BTN_CON
+  englishFont: {fileID: 0}
+  chineseFont: {fileID: 0}
 --- !u!1 &1051558361
 GameObject:
   m_ObjectHideFlags: 0
@@ -6856,7 +6862,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ebefa1821a458841b7d721b15dccc5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentLanguage: EN
+  currentLanguage: 
+  englishFont: {fileID: 11400000, guid: f71803b4ed3c417438825c3204ee7568, type: 2}
+  chineseFont: {fileID: 11400000, guid: e588b4ccd72391148b7f013ff8f9bf69, type: 2}
 --- !u!114 &1097654521
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8005,7 +8013,7 @@ MonoBehaviour:
   m_text: Settings
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f71803b4ed3c417438825c3204ee7568, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: 981402214ad2af845b4bba0c9067066c, type: 2}
+  m_sharedMaterial: {fileID: 1491955986336758203, guid: f71803b4ed3c417438825c3204ee7568, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -8109,6 +8117,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: BTN_SET
+  englishFont: {fileID: 0}
+  chineseFont: {fileID: 0}
 --- !u!1 &1342331789
 GameObject:
   m_ObjectHideFlags: 0
@@ -11407,6 +11417,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: BTN_QUIT
+  englishFont: {fileID: 0}
+  chineseFont: {fileID: 0}
 --- !u!114 &1810812152
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11554,6 +11566,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: BTN_CONTINUE
+  englishFont: {fileID: 0}
+  chineseFont: {fileID: 0}
 --- !u!114 &1851543338
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12512,7 +12526,7 @@ MonoBehaviour:
 '
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f71803b4ed3c417438825c3204ee7568, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: 981402214ad2af845b4bba0c9067066c, type: 2}
+  m_sharedMaterial: {fileID: 1491955986336758203, guid: f71803b4ed3c417438825c3204ee7568, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -12616,6 +12630,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: BTN_QUIT
+  englishFont: {fileID: 0}
+  chineseFont: {fileID: 0}
 --- !u!1 &2054150967
 GameObject:
   m_ObjectHideFlags: 0

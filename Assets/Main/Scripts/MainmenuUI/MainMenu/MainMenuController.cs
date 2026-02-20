@@ -250,7 +250,7 @@ public class MainMenuController : MonoBehaviour
     {
         Debug.Log("Start New Game");
         if (GameSystem.Instance != null) GameSystem.Instance.isLoadingFromSave = false;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Prologue");
     }
     void ShowMenu()
     {
