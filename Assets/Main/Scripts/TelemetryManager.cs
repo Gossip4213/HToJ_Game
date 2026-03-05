@@ -29,7 +29,8 @@ public class PlayerProfile
 {
     public string user_uuid;             
     public string native_language;       
-    public bool is_multilingual;         
+    public bool is_multilingual;
+    public List<string> secondary_languages;
     public string locked_game_language;  
     public int total_playthroughs;       
 }
@@ -151,5 +152,31 @@ public class TelemetryManager : MonoBehaviour
     {
         LogEvent("game_quit", "app_closed");
         SaveToLocal();
+    }
+    /// <summary>
+    /// new savedata needs to claim the languages background.
+    /// </summary>
+    public void SetPlayerProfile(string nativeLang, bool isMultilingual, string lockedLang, List<string> secondaryLangs)
+    {
+        _payload.profile.native_language = nativeLang;
+        _payload.profile.is_multilingual = isMultilingual;
+        _payload.profile.locked_game_language = lockedLang;
+        _payload.profile.secondary_languages = secondaryLangs != null ? new List<string>(secondaryLangs) : new List<string>();
+
+        int currentPlaythroughs = PlayerPrefs.GetInt("Playthroughs", 0) + 1;
+        PlayerPrefs.SetInt("Playthroughs", currentPlaythroughs);
+        _payload.profile.total_playthroughs = currentPlaythroughs;
+
+        Debug.Log($"【系统校准完毕】母语: {nativeLang} | 多语言者: {isMultilingual} | 锁定语言: {lockedLang} | 当前周目: {currentPlaythroughs}");
+        SaveToLocal();
+    }
+    void Update()
+    {
+        // for test only
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            Debug.Log("【test】 U ...");
+            UploadDataToServer();
+        }
     }
 }

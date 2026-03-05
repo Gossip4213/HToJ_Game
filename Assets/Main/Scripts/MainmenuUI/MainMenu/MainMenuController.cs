@@ -20,6 +20,7 @@ public class MainMenuController : MonoBehaviour
     public TextMeshProUGUI speedPreviewText;
     public TextMeshProUGUI sizePreviewText;
     public SaveLoadMenuController saveLoadMenu;
+    public GameObject panelCalibration;
 
     private Resolution[] resolutions;
 
@@ -248,9 +249,19 @@ public class MainMenuController : MonoBehaviour
     }
     public void OnBtnStartClick()
     {
-        Debug.Log("Start New Game");
+        Debug.Log(" Start New Game request...");
+
         if (GameSystem.Instance != null) GameSystem.Instance.isLoadingFromSave = false;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Prologue");
+
+        if (panelCalibration != null)
+        {
+            panelCalibration.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("No PanelCalibration ");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Prologue");
+        }
     }
     void ShowMenu()
     {
