@@ -1,4 +1,4 @@
-# Heads, Tails, or Justice? (HToJ)
+# Heads, Tails, or Justice? (HToJ):Gamified Data Collection Platform in Ethical Dilemmas
 
 ![Unity](https://img.shields.io/badge/Unity-2022_LTS-black?style=flat&logo=unity)
 ![Language](https://img.shields.io/badge/Language-C%23-blue?style=flat&logo=csharp)
