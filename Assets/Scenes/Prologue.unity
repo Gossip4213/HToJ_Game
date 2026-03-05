@@ -2146,6 +2146,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1937512040}
   m_CullTransparentMesh: 1
+--- !u!1 &1981124748
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1981124749}
+  - component: {fileID: 1981124750}
+  m_Layer: 0
+  m_Name: '[Telemetry_Observer]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1981124749
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981124748}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1149.6838, y: 582.8698, z: -10.450383}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1981124750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981124748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 097425a6b87fb4048bda53cec520c363, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverEndpoint: https://webhook.site/29d67cce-cc16-4891-8bc0-5351a4b65d0e
 --- !u!1 &2025353046
 GameObject:
   m_ObjectHideFlags: 0
@@ -2350,3 +2395,4 @@ SceneRoots:
   - {fileID: 1544433953}
   - {fileID: 143831956}
   - {fileID: 1834817446}
+  - {fileID: 1981124749}

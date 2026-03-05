@@ -30,7 +30,7 @@ public class DialogueController : MonoBehaviour
     private bool _isTyping = false;
     private string _currentFullText = "";
     private Coroutine _typingCoroutine;
-
+    private float _choiceStartTime = 0f;
     void Start()
     {
         if (continueIcon != null) continueIcon.SetActive(false);
@@ -113,22 +113,24 @@ public class DialogueController : MonoBehaviour
     {
         if (story == null || story.currentChoices.Count == 0) return;
 
-        Debug.Log($"【寻人启事】UI 传来的目标 ID 是: [{id}]");
+        float hesitationDuration = Time.realtimeSinceStartup - _choiceStartTime;
 
         for (int i = 0; i < story.currentChoices.Count; i++)
         {
             Choice choice = story.currentChoices[i];
-
-            string allTags = choice.tags != null ? string.Join(", ", choice.tags) : "没贴标签";
-            Debug.Log($"【排查选项 {i}】文本: '{choice.text}' | 身上的标签: [{allTags}]");
-
             if (choice.tags != null)
             {
                 foreach (string tag in choice.tags)
                 {
                     if (tag.Trim() == "id:" + id.Trim())
                     {
-                        Debug.Log("【配对成功】跳转！");
+                        Debug.Log($"【学术记录】玩家在房间里发呆了 {hesitationDuration:F2} 秒后，调查了 [{id}]。");
+
+                        if (TelemetryManager.Instance != null)
+                        {
+                            TelemetryManager.Instance.LogEvent("investigate_object", id, hesitationDuration);
+                        }
+
                         story.ChooseChoiceIndex(i);
                         NotifyExitUI();
                         DisplayNextLine();
@@ -137,7 +139,6 @@ public class DialogueController : MonoBehaviour
                 }
             }
         }
-        Debug.LogWarning("【结论】剧本没找着配对的标签。请对比上方的【寻人启事】和【排查选项】！");
     }
 
     // --- Ink ---
@@ -216,7 +217,8 @@ public class DialogueController : MonoBehaviour
 
             if (isInvestigation)
             {
-                Debug.Log("调查，等待点击场景物品");
+                Debug.Log("【观测】进入调查模式，等待玩家点击场景物品...");
+                _choiceStartTime = Time.realtimeSinceStartup;
             }
             else
             {
@@ -230,6 +232,7 @@ public class DialogueController : MonoBehaviour
         if (choiceBubblePanel == null || choiceButtons == null) return;
 
         choiceBubblePanel.SetActive(true);
+        _choiceStartTime = Time.realtimeSinceStartup; 
 
         for (int i = 0; i < choiceButtons.Length; i++)
         {
@@ -253,6 +256,14 @@ public class DialogueController : MonoBehaviour
     private void OnBubbleClicked(int index)
     {
         if (choiceBubblePanel != null) choiceBubblePanel.SetActive(false);
+        float hesitationDuration = Time.realtimeSinceStartup - _choiceStartTime;
+        string choiceText = story.currentChoices[index].text;
+
+        if (TelemetryManager.Instance != null)
+        {
+            TelemetryManager.Instance.LogChoiceHesitation(choiceText, hesitationDuration);
+        }
+
         story.ChooseChoiceIndex(index);
         DisplayNextLine();
     }
