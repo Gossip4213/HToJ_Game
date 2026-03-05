@@ -19,15 +19,28 @@ public class CalibrationUIController : MonoBehaviour
     [Header("场景设置")]
     public string prologueSceneName = "PrologueScene";
 
+    void Start()
+    {
+        if (multilingualToggle != null)
+        {
+            multilingualToggle.onValueChanged.AddListener(OnMultilingualToggled);
+        }
+    }
+
     void OnEnable()
     {
-        UpdateWarningText(); 
+        UpdateWarningText();
 
         if (LocalizationManager.Instance != null)
         {
             LocalizationManager.Instance.OnLanguageChanged += UpdateWarningText;
         }
+        if (multilingualToggle != null)
+        {
+            OnMultilingualToggled(multilingualToggle.isOn);
+        }
     }
+    
 
     void OnDisable()
     {
@@ -82,13 +95,16 @@ public class CalibrationUIController : MonoBehaviour
         List<string> collectedSecondaryLangs = new List<string>();
         if (isMulti)
         {
-
             foreach (Toggle t in secondaryLangToggles)
             {
-                if (t.isOn)
+                if (t != null && t.isOn)
                 {
-                    TextMeshProUGUI label = t.GetComponentInChildren<TextMeshProUGUI>();
-                    if (label != null) collectedSecondaryLangs.Add(label.text);
+                    TMP_Text tmpLabel = t.GetComponentInChildren<TMP_Text>();
+                    Text legacyLabel = t.GetComponentInChildren<Text>();
+
+                    if (tmpLabel != null) collectedSecondaryLangs.Add(tmpLabel.text);
+                    else if (legacyLabel != null) collectedSecondaryLangs.Add(legacyLabel.text);
+                    else collectedSecondaryLangs.Add(t.gameObject.name); 
                 }
             }
 
@@ -106,7 +122,7 @@ public class CalibrationUIController : MonoBehaviour
         PlayerPrefs.SetInt("HasLockedLanguage", 1);
         PlayerPrefs.Save();
 
-        Debug.Log("【系统】调查完毕，数据已入库...");
+        Debug.Log("data is recorded...");
         SceneManager.LoadScene(prologueSceneName);
     }
 
