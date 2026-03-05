@@ -100,12 +100,24 @@ public class GameSystem : MonoBehaviour
 
     public void SaveGame(int slotIndex)
     {
+        CurrentSave.currentSceneName = SceneManager.GetActiveScene().name;
         CurrentSave.saveTime = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm");
+
+        DialogueController dc = UnityEngine.Object.FindFirstObjectByType<DialogueController>(); 
+        if (dc != null && dc.story != null)
+        {
+            CurrentSave.inkStoryState = dc.story.state.ToJson();
+            Debug.Log("【系统】已成功提取当前对话时间线。");
+        }
+        else
+        {
+            Debug.LogWarning("【警告】当前场景没有找到对话控制器，未能保存！");
+        }
 
         string json = JsonUtility.ToJson(CurrentSave, true);
         File.WriteAllText(GetSavePath(slotIndex), json);
 
-        Debug.Log($"[System] Game Saved to Slot {slotIndex}");
+        Debug.Log($"[System] Game Saved to Slot {slotIndex} | 锚点: {CurrentSave.currentSceneName}");
     }
 
     public void LoadAndStartGame(int slotIndex)
@@ -122,11 +134,12 @@ public class GameSystem : MonoBehaviour
 
         isLoadingFromSave = true;
 
-        string sceneToLoad = string.IsNullOrEmpty(CurrentSave.currentSceneName) ? "GameScene" : CurrentSave.currentSceneName;
+        string sceneToLoad = string.IsNullOrEmpty(CurrentSave.currentSceneName) ? "Prologue" : CurrentSave.currentSceneName;
         Debug.Log($"[System] Loading Slot {slotIndex}... Jumping to: {sceneToLoad}");
 
         SceneManager.LoadScene(sceneToLoad);
     }
+
 
     public void UploadChoice(string choiceID)
     {

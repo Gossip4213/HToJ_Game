@@ -17,7 +17,7 @@ public class DialogueController : MonoBehaviour
 
     [Header("Ink Core")]
     public TextAsset inkJSONAsset;
-    private Story story;
+    public Story story;
 
     [Header("UI Components")]
     public TextMeshProUGUI txtSpeaker;
@@ -161,28 +161,45 @@ public class DialogueController : MonoBehaviour
 
         if (selectedJSON == null)
         {
-            Debug.LogError("【Ink 错误】没有找到对应的语言剧本！");
+            Debug.LogError("【Ink 错误】没有找到对应语言story");
             return;
         }
-
-        if (story == null)
+        if (GameSystem.Instance != null && GameSystem.Instance.isLoadingFromSave)
         {
-            story = new Story(selectedJSON.text);
+            story = new Story(selectedJSON.text); 
+            string savedState = GameSystem.Instance.CurrentSave.inkStoryState;
+
+            if (!string.IsNullOrEmpty(savedState))
+            {
+                try
+                {
+                    story.state.LoadJson(savedState);
+                    Debug.Log("【观测】完美到存档。");
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning("无法继承存档进度: " + e.Message);
+                }
+            }
+            GameSystem.Instance.isLoadingFromSave = false;
         }
-        else
+        else if (story != null)
         {
             string savedState = story.state.ToJson();
             story = new Story(selectedJSON.text);
-
             try
             {
                 story.state.LoadJson(savedState);
-                Debug.Log("转移成功！进度已继承。");
+                Debug.Log("多语言进度已继承");
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning("剧本结构不一致，无法继承进度，将重新开始。错误: " + e.Message);
+                Debug.LogWarning("剧本结构不一致，无法继承; 错误: " + e.Message);
             }
+        }
+        else
+        {
+            story = new Story(selectedJSON.text);
         }
     }
 

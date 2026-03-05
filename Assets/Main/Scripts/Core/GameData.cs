@@ -10,8 +10,8 @@ public class PlayerSaveProfile
 
     public string currentSceneName; 
     public string currentScriptID;  
-    public string saveTime;         
-
+    public string saveTime;
+    public string inkStoryState;
     public int currentChapterIndex = 0;
     public Dictionary<string, string> choicesHistory = new Dictionary<string, string>();
 }
