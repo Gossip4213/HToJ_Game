@@ -6892,7 +6892,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectID: TheDrug
-  hoverThought: TheDrug
+  hoverThought: A tiny glass vial of tomorrow, held hostage by a price tag.
   highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
   hoverScale: 1.05
 --- !u!1 &1418482855
@@ -7709,7 +7709,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectID: TheChemist
-  hoverThought: TheChemist
+  hoverThought: A proud man who weighs human breath in gold coins.
   highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
   hoverScale: 1.05
 --- !u!1 &1568602538
@@ -12123,7 +12123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectID: TheWife
-  hoverThought: TheWife
+  hoverThought: A fading shadow.
   highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
   hoverScale: 1.05
 --- !u!1 &2072849633

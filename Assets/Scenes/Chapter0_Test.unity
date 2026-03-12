@@ -616,7 +616,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectID: SilverCoin
-  hoverThought: SilverCoin
+  hoverThought: I've been carrying it with me.
   highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
   hoverScale: 1.05
 --- !u!1 &114641065
@@ -4945,7 +4945,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectID: The Judge
-  hoverThought: The Judge
+  hoverThought: He watches. No pity, no anger. Just a cold hunger for my choice.
   highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
   hoverScale: 1.05
 --- !u!1 &885282334
@@ -7187,7 +7187,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectID: Lever
-  hoverThought: Lever
+  hoverThought: Heavy, rusting iron. The physical weight of decisions.
   highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
   hoverScale: 1.05
 --- !u!1 &1418482855
@@ -8004,7 +8004,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectID: TheFive
-  hoverThought: TheFive
+  hoverThought: Five beating hearts.
   highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
   hoverScale: 1.05
 --- !u!1 &1557281118
@@ -12599,7 +12599,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectID: TheOne
-  hoverThought: TheOne
+  hoverThought: An unaware soul.
   highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
   hoverScale: 1.05
 --- !u!1 &2072849633
