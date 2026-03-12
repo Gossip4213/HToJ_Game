@@ -222,25 +222,27 @@ public class DialogueController : MonoBehaviour
         }
         else if (story.currentChoices.Count > 0)
         {
-            bool isInvestigation = false;
+            bool hasInvestigation = false;
 
-            if (story.currentChoices[0].tags != null)
+            foreach (var choice in story.currentChoices)
             {
-                foreach (string tag in story.currentChoices[0].tags)
+                if (choice.tags != null)
                 {
-                    if (tag.StartsWith("id:")) isInvestigation = true;
+                    foreach (string tag in choice.tags)
+                    {
+                        if (tag.StartsWith("id:")) hasInvestigation = true;
+                    }
                 }
             }
 
-            if (isInvestigation)
+            if (hasInvestigation)
             {
                 Debug.Log("【观测】进入调查模式，等待玩家点击场景物品...");
-                _choiceStartTime = Time.realtimeSinceStartup;
             }
-            else
-            {
-                ShowChoiceBubbles();
-            }
+
+            _choiceStartTime = Time.realtimeSinceStartup;
+
+            ShowChoiceBubbles();
         }
     }
 
@@ -248,26 +250,45 @@ public class DialogueController : MonoBehaviour
     {
         if (choiceBubblePanel == null || choiceButtons == null) return;
 
-        choiceBubblePanel.SetActive(true);
-        _choiceStartTime = Time.realtimeSinceStartup; 
+        int uiButtonIndex = 0; 
+        bool hasNormalChoices = false; 
 
-        for (int i = 0; i < choiceButtons.Length; i++)
+        for (int i = 0; i < story.currentChoices.Count; i++)
         {
-            if (i < story.currentChoices.Count)
+            bool isInvestigation = false;
+            if (story.currentChoices[i].tags != null)
             {
-                choiceButtons[i].gameObject.SetActive(true);
-
-                TextMeshProUGUI btnText = choiceButtons[i].GetComponentInChildren<TextMeshProUGUI>();
-                if (btnText != null) btnText.text = story.currentChoices[i].text;
-                int choiceIndex = i;
-                choiceButtons[i].onClick.RemoveAllListeners();
-                choiceButtons[i].onClick.AddListener(() => OnBubbleClicked(choiceIndex));
+                foreach (string tag in story.currentChoices[i].tags)
+                {
+                    if (tag.StartsWith("id:")) isInvestigation = true;
+                }
             }
-            else
+
+            if (!isInvestigation)
             {
-                choiceButtons[i].gameObject.SetActive(false);
+                if (uiButtonIndex < choiceButtons.Length)
+                {
+                    choiceButtons[uiButtonIndex].gameObject.SetActive(true);
+
+                    TextMeshProUGUI btnText = choiceButtons[uiButtonIndex].GetComponentInChildren<TextMeshProUGUI>();
+                    if (btnText != null) btnText.text = story.currentChoices[i].text;
+
+                    int choiceIndex = i;
+                    choiceButtons[uiButtonIndex].onClick.RemoveAllListeners();
+                    choiceButtons[uiButtonIndex].onClick.AddListener(() => OnBubbleClicked(choiceIndex));
+
+                    uiButtonIndex++;
+                    hasNormalChoices = true;
+                }
             }
         }
+
+        for (int i = uiButtonIndex; i < choiceButtons.Length; i++)
+        {
+            choiceButtons[i].gameObject.SetActive(false);
+        }
+
+        choiceBubblePanel.SetActive(hasNormalChoices);
     }
 
     private void OnBubbleClicked(int index)
@@ -291,9 +312,33 @@ public class DialogueController : MonoBehaviour
         foreach (string tag in tags)
         {
             string[] split = tag.Split(':');
+
             if (split.Length == 2 && split[0].Trim() == "speaker")
             {
                 txtSpeaker.text = split[1].Trim();
+            }
+            if (split.Length == 2 && split[0].Trim() == "load_scene")
+            {
+                string sceneName = split[1].Trim();
+                Debug.Log($"Ink ：{sceneName}");
+
+                Time.timeScale = 1f;
+
+                if (GameSystem.Instance != null) GameSystem.Instance.SaveGame(0);
+
+                UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+            }
+            if (split.Length == 2 && split[0].Trim() == "action")
+            {
+                string act = split[1].Trim();
+                if (act == "upload_data")
+                {
+                    Debug.Log("uploading data ...");
+                    if (TelemetryManager.Instance != null)
+                    {
+                        TelemetryManager.Instance.UploadDataToServer();
+                    }
+                }
             }
         }
     }

@@ -8,14 +8,26 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
-  - enabled: 1
+  - enabled: 0
     path: Assets/Main/Scripts/MainmenuUI/MainMenu/MainMenu.unity
     guid: a83fad1f33f25d249817eefb96f4685a
+  - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: 1596fced58db85c4dab8317795ef22cf
   - enabled: 1
     path: Assets/Scenes/Prologue.unity
     guid: 1e5bf4d642bf83b47aa523f0cf6e0c2d
   - enabled: 1
-    path: Assets/Scenes/Meeting_TemplateScene.unity
+    path: Assets/Scenes/Chapter0_Test.unity
+    guid: e0684442f975f9d4d8cd483bff9b9a52
+  - enabled: 1
+    path: Assets/Scenes/Chapter1_Test.unity
+    guid: 976bd48316cc33845b9cea71fe2b050a
+  - enabled: 1
+    path: Assets/Scenes/Test_ending.unity
+    guid: 94f2d97ef942964468661759dd9f43cd
+  - enabled: 1
+    path: Assets/Scenes/Z_Meeting_TemplateScene.unity
     guid: 9818b90e0f405594f97acc66193e4da3
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

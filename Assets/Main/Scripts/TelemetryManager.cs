@@ -49,7 +49,7 @@ public class TelemetryManager : MonoBehaviour
 
     [Header("·şÎñÆ÷ÅäÖÃ")]
 
-    public string serverEndpoint = "https://webhook.site/29d67cce-cc16-4891-8bc0-5351a4b65d0e";
+    public string serverEndpoint = "https://webhook.site/97b1f492-16e6-48a5-92dd-b264cd0ed38a";
 
     private TelemetryPayload _payload;
     private string _localSavePath;
