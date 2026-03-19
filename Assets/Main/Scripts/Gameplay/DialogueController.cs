@@ -36,7 +36,6 @@ public class DialogueController : MonoBehaviour
         if (continueIcon != null) continueIcon.SetActive(false);
         StartStory();
     }
-
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -45,7 +44,6 @@ public class DialogueController : MonoBehaviour
             {
                 return;
             }
-
             OnUserClick();
         }
     }
@@ -111,6 +109,7 @@ public class DialogueController : MonoBehaviour
 
     public void SelectThisObject(string id)
     {
+        
         if (story == null || story.currentChoices.Count == 0) return;
 
         float hesitationDuration = Time.realtimeSinceStartup - _choiceStartTime;
@@ -124,7 +123,7 @@ public class DialogueController : MonoBehaviour
                 {
                     if (tag.Trim() == "id:" + id.Trim())
                     {
-                        Debug.Log($"【学术记录】玩家在房间里发呆了 {hesitationDuration:F2} 秒后，调查了 [{id}]。");
+                        Debug.Log($"[recording] 玩家在房间里发呆了 {hesitationDuration:F2} 秒后，调查了 [{id}]");
 
                         if (TelemetryManager.Instance != null)
                         {
@@ -313,31 +312,52 @@ public class DialogueController : MonoBehaviour
         {
             string[] split = tag.Split(':');
 
-            if (split.Length == 2 && split[0].Trim() == "speaker")
-            {
-                txtSpeaker.text = split[1].Trim();
-            }
-            if (split.Length == 2 && split[0].Trim() == "load_scene")
-            {
-                string sceneName = split[1].Trim();
-                Debug.Log($"Ink ：{sceneName}");
+            if (split.Length < 2) continue;
 
+            string tagKey = split[0].Trim();
+            string tagValue = split[1].Trim();
+
+            if (tagKey == "speaker")
+            {
+                txtSpeaker.text = tagValue;
+            }
+            else if (tagKey == "load_scene")
+            {
+                Debug.Log($"【系统】Ink 请求：{tagValue}");
                 Time.timeScale = 1f;
-
                 if (GameSystem.Instance != null) GameSystem.Instance.SaveGame(0);
-
-                UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+                UnityEngine.SceneManagement.SceneManager.LoadScene(tagValue);
             }
-            if (split.Length == 2 && split[0].Trim() == "action")
+            else if (tagKey == "action")
             {
-                string act = split[1].Trim();
-                if (act == "upload_data")
+                if (tagValue == "upload_data")
                 {
-                    Debug.Log("uploading data ...");
+                    Debug.Log("data uploading...");
                     if (TelemetryManager.Instance != null)
                     {
                         TelemetryManager.Instance.UploadDataToServer();
                     }
+                }
+            }
+            else if (tagKey == "portrait")
+            {
+                if (ScenarioManager.Instance != null)
+                {
+                    ScenarioManager.Instance.ChangePortrait(tagValue);
+                }
+            }
+            else if (tagKey == "show")
+            {
+                if (ScenarioManager.Instance != null)
+                {
+                    ScenarioManager.Instance.ToggleProp(tagValue, true);
+                }
+            }
+            else if (tagKey == "hide")
+            {
+                if (ScenarioManager.Instance != null)
+                {
+                    ScenarioManager.Instance.ToggleProp(tagValue, false);
                 }
             }
         }

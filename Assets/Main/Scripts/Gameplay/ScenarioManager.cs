@@ -1,66 +1,58 @@
 using System.Collections.Generic;
-using TMPro;
-using UnityEditor.Overlays;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ScenarioManager : MonoBehaviour
 {
-    [Header("UI")]
-    public TextMeshProUGUI txtBody;
-    public TextMeshProUGUI txtSpeaker;
-    public Transform choiceContainer;
-    public GameObject buttonPrefab;
+    // 单例模式，方便全局调用
+    public static ScenarioManager Instance { get; private set; }
 
-    [Header("avatars")]
-    public Sprite iconSera;
-    public Sprite iconKate;
-    public Sprite iconAdams;
-    public Sprite iconMiniel;
-    public Sprite iconRumins;
+    [Header("Portraits")]
+    public Image portraitDisplay; 
+    public List<Sprite> portraitSprites; 
 
-    [Header("Test")]
-    public CaseData testCase; 
+    [Header("Stage Props")]
+    public List<GameObject> sceneProps; 
 
-    void Start()
+    void Awake()
     {
-        if (testCase != null) LoadCase(testCase);
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
     }
 
-    public void LoadCase(CaseData data)
+    public void ChangePortrait(string portraitName)
     {
-        txtSpeaker.text = "Sera";
-        txtBody.text = data.description_CN;
-        GenerateChoices(data.options);
-    }
+        if (portraitDisplay == null) return;
 
-    void GenerateChoices(List<AdvancedOption> options)
-    {
-
-        foreach (Transform child in choiceContainer) Destroy(child.gameObject);
-
-        foreach (var option in options)
+        // 如果剧本传入的是 "none" 或者空，就隐藏立绘
+        if (string.IsNullOrEmpty(portraitName) || portraitName.ToLower() == "none")
         {
-            GameObject btnObj = Instantiate(buttonPrefab, choiceContainer);
-
-            var texts = btnObj.GetComponentsInChildren<TextMeshProUGUI>();
-            if (texts.Length > 0) texts[0].text = option.text_CN;
-
-            btnObj.GetComponent<Button>().onClick.AddListener(() => OnOptionSelected(option));
-        }
-    }
-
-    void OnOptionSelected(AdvancedOption option)
-    {
-        Debug.Log("Ambrose choose: " + option.text_CN);
-
-        txtBody.text = option.outcomeText_CN;
-
-        foreach (var impact in option.impacts)
-        {
-            Debug.Log($"summary: {impact.target} {impact.valueChange}");
+            portraitDisplay.gameObject.SetActive(false);
+            return;
         }
 
-        foreach (Transform child in choiceContainer) Destroy(child.gameObject);
+        foreach (Sprite s in portraitSprites)
+        {
+            if (s != null && s.name == portraitName) 
+            {
+                portraitDisplay.sprite = s;
+                portraitDisplay.gameObject.SetActive(true);
+                return;
+            }
+        }
+        Debug.LogWarning($"没在列表里找到名为 '{portraitName}' 的立绘图片！");
+    }
+
+    public void ToggleProp(string propName, bool isVisible)
+    {
+        foreach (GameObject prop in sceneProps)
+        {
+            if (prop != null && prop.name == propName) 
+            {
+                prop.SetActive(isVisible);
+                return;
+            }
+        }
+        Debug.LogWarning($"没在列表里找到名为 '{propName}' 的场景物品！");
     }
 }
