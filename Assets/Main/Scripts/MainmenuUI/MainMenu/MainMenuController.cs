@@ -6,11 +6,16 @@ using UnityEngine.UI;
 
 public class MainMenuController : MonoBehaviour
 {
+    [Header("Panels")]
     public GameObject panelMenu;
     public GameObject panelSettings;
+    public GameObject panelCalibration; 
+
+    [Header("UI Elements")]
     public Button btnContinue;
     public TMP_Dropdown langDropdown;
     public TMP_Dropdown resDropdown;
+    public TMP_Dropdown profileDropdown; 
     public Toggle windowedToggle;
     public Toggle skipUnreadToggle;
     public Slider musicSlider;
@@ -19,31 +24,108 @@ public class MainMenuController : MonoBehaviour
     public Slider fontSizeSlider;
     public TextMeshProUGUI speedPreviewText;
     public TextMeshProUGUI sizePreviewText;
+
+    [Header("Managers")]
     public SaveLoadMenuController saveLoadMenu;
-    public GameObject panelCalibration;
 
     private Resolution[] resolutions;
-
     public static System.Action<float> OnFontSizeChanged;
-
     private Coroutine _typingCoroutine;
     private string _previewContent = "Hmm... is it heads or tails this time? I am not sure....";
 
     void Start()
     {
-        ShowMenu();
         InitSettingsUI();
+        InitProfileSystem(); 
+
         if (langDropdown != null)
         {
             langDropdown.onValueChanged.AddListener(OnLanguageChanged);
-            string savedLang = PlayerPrefs.GetString("SelectedLanguage", "EN");
         }
         CheckContinueButton();
-        if (langDropdown != null)
+    }
+
+    void InitProfileSystem()
+    {
+        ShowMenu();
+        RefreshProfileDropdown();
+
+        if (profileDropdown != null)
         {
-            langDropdown.onValueChanged.AddListener(OnLanguageChanged);
+            profileDropdown.onValueChanged.RemoveAllListeners();
+            profileDropdown.onValueChanged.AddListener(OnProfileDropdownChanged);
         }
     }
+
+    void RefreshProfileDropdown()
+    {
+        if (profileDropdown == null) return;
+
+        string allProfiles = PlayerPrefs.GetString("AllProfiles", "");
+        string[] profiles = allProfiles.Split(new char[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+        profileDropdown.ClearOptions();
+        List<string> options = new List<string>(profiles);
+        profileDropdown.AddOptions(options);
+
+        string current = PlayerPrefs.GetString("CurrentUser", "");
+        int currentIndex = options.IndexOf(current);
+        if (currentIndex >= 0)
+        {
+            profileDropdown.value = currentIndex;
+        }
+        profileDropdown.RefreshShownValue();
+    }
+
+    public void OnProfileDropdownChanged(int index)
+    {
+        if (profileDropdown == null) return;
+        string selectedProfile = profileDropdown.options[index].text;
+
+        PlayerPrefs.SetString("CurrentUser", selectedProfile);
+        PlayerPrefs.Save();
+
+        Debug.Log($"【系统】已将观测对象切换至：{selectedProfile}");
+        CheckContinueButton(); 
+    }
+    public void OnBtnShowCalibrationClick()
+    {
+        ShowCalibrationPanel();
+    }
+
+    void ShowCalibrationPanel()
+    {
+        if (panelMenu != null) panelMenu.SetActive(false);
+        if (panelSettings != null) panelSettings.SetActive(false);
+        if (panelCalibration != null) panelCalibration.SetActive(true);
+    }
+
+    public void OnBtnStartClick()
+    {
+        Debug.Log("Start New Game request...");
+        if (GameSystem.Instance != null) GameSystem.Instance.isLoadingFromSave = false;
+
+        string currentProfile = PlayerPrefs.GetString("CurrentUser", "");
+
+        if (string.IsNullOrEmpty(currentProfile))
+        {
+            Debug.Log("无档案，拦截 Start ...");
+            ShowCalibrationPanel();
+        }
+        else
+        {
+            Debug.Log($" {currentProfile} welcome...");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Prologue");
+        }
+    }
+
+    public void ShowMenu()
+    {
+        if (panelMenu != null) panelMenu.SetActive(true);
+        if (panelSettings != null) panelSettings.SetActive(false);
+        if (panelCalibration != null) panelCalibration.SetActive(false);
+    }
+
     void CheckContinueButton()
     {
         bool hasSave = false;
@@ -53,20 +135,36 @@ public class MainMenuController : MonoBehaviour
         }
         btnContinue.interactable = hasSave;
         var text = btnContinue.GetComponentInChildren<TextMeshProUGUI>();
-        if (text != null)
-        {
-            text.alpha = hasSave ? 1f : 0.5f;
-        }
-
-        Debug.Log($"save status: {hasSave}, : {(hasSave ? "light" : "grey")}");
+        if (text != null) text.alpha = hasSave ? 1f : 0.5f;
     }
+
     public void OnBtnContinueClick()
     {
-        if (saveLoadMenu != null)
-        {
-            saveLoadMenu.ShowMenu(false);
-        }
+        if (saveLoadMenu != null) saveLoadMenu.ShowMenu(false);
     }
+
+    public void OnBtnSettingsClick()
+    {
+        if (panelMenu != null) panelMenu.SetActive(false);
+        if (panelSettings != null) panelSettings.SetActive(true);
+        if (panelCalibration != null) panelCalibration.SetActive(false);
+    }
+
+    public void OnBtnCloseSettingsClick()
+    {
+        ShowMenu();
+    }
+
+    public void OnBtnQuitClick()
+    {
+        Debug.Log("exiting.....");
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
 
     void InitSettingsUI()
     {
@@ -160,26 +258,23 @@ public class MainMenuController : MonoBehaviour
     public void SetSFXVolume(float val)
     {
         PlayerPrefs.SetFloat("SFXVol", val);
+        if (GameSystem.Instance != null) GameSystem.Instance.SetSFXVolume(val);
     }
 
     public void SetTextSpeed(float val)
     {
         int level = Mathf.RoundToInt(val);
         float charDelay = 0.05f;
-        float actualSpeed = 1.0f;
 
         switch (level)
         {
             case 0:
-                actualSpeed = 0.5f;
                 charDelay = 0.1f;
                 break;
             case 1:
-                actualSpeed = 1.0f;
                 charDelay = 0.05f;
                 break;
             case 2:
-                actualSpeed = 2.0f;
                 charDelay = 0.02f;
                 break;
         }
@@ -192,6 +287,7 @@ public class MainMenuController : MonoBehaviour
             _typingCoroutine = StartCoroutine(RunTypewriterEffect(charDelay));
         }
     }
+
     IEnumerator RunTypewriterEffect(float delay)
     {
         speedPreviewText.text = "";
@@ -247,57 +343,15 @@ public class MainMenuController : MonoBehaviour
 
         if (OnFontSizeChanged != null) OnFontSizeChanged.Invoke(scaleFactor);
     }
-    public void OnBtnStartClick()
-    {
-        Debug.Log(" Start New Game request...");
-
-        if (GameSystem.Instance != null) GameSystem.Instance.isLoadingFromSave = false;
-
-        if (panelCalibration != null)
-        {
-            panelCalibration.SetActive(true);
-        }
-        else
-        {
-            Debug.LogError("No PanelCalibration ");
-            UnityEngine.SceneManagement.SceneManager.LoadScene("Prologue");
-        }
-    }
-    void ShowMenu()
-    {
-        if (panelMenu != null) panelMenu.SetActive(true);
-        if (panelSettings != null) panelSettings.SetActive(false);
-    }
-
-    public void OnBtnSettingsClick()
-    {
-        if (panelMenu != null) panelMenu.SetActive(false);
-        if (panelSettings != null) panelSettings.SetActive(true);
-    }
-
-    public void OnBtnQuitClick()
-    {
-        Debug.Log("exiting.....");
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
-    }
-
-    public void OnBtnCloseSettingsClick()
-    {
-        ShowMenu();
-    }
 
     public void OnLanguageChanged(int index)
     {
         string code = "EN";
         switch (index)
         {
-            case 0: code = "EN"; break; 
-            case 1: code = "ZH_CN"; break; 
-            case 2: code = "JP"; break; 
+            case 0: code = "EN"; break;
+            case 1: code = "ZH_CN"; break;
+            case 2: code = "JP"; break;
             case 3: code = "KR"; break;
         }
 
@@ -314,7 +368,6 @@ public class MainMenuController : MonoBehaviour
     {
         Application.OpenURL("https://space.bilibili.com/9039940");
     }
-
 
     public class UISmoothPopup : MonoBehaviour
     {

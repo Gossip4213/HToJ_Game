@@ -2601,7 +2601,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.95800006, y: 0.94600004}
   m_AnchorMax: {x: 0.95800006, y: 0.94600004}
-  m_AnchoredPosition: {x: 13.570984, y: -2.670105}
+  m_AnchoredPosition: {x: 13.571045, y: -2.670044}
   m_SizeDelta: {x: 97.3336, y: 104.35}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &552856592
@@ -9821,9 +9821,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d8fabee3ce06804fa0cef2fca5c5122, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  portraitDisplay: {fileID: 0}
+  portraitDisplay: {fileID: 1768323942}
   portraitSprites: []
+  bgDisplay: {fileID: 1214669233}
+  bgSprites: []
   sceneProps: []
+  bgmClips: []
+  sfxClips: []
 --- !u!4 &1834817446
 Transform:
   m_ObjectHideFlags: 0

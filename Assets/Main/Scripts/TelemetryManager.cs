@@ -1,19 +1,19 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.IO;
 using System.Text;
-
+using System;
 
 [System.Serializable]
 public class TelemetryEvent
 {
-    public string timestamp;      
-    public string event_type;     
-    public string target_id;      
-    public float duration_sec;    
-    public string extra_data;     
+    public string timestamp;
+    public string event_type;
+    public string target_id;
+    public float duration_sec;
+    public string extra_data;
 }
 
 [System.Serializable]
@@ -27,12 +27,12 @@ public class GameSession
 [System.Serializable]
 public class PlayerProfile
 {
-    public string user_uuid;             
-    public string native_language;       
+    public string user_uuid;
+    public string native_language;
     public bool is_multilingual;
     public List<string> secondary_languages;
-    public string locked_game_language;  
-    public int total_playthroughs;       
+    public string locked_game_language;
+    public int total_playthroughs;
 }
 
 [System.Serializable]
@@ -42,14 +42,18 @@ public class TelemetryPayload
     public GameSession current_session;
 }
 
-
 public class TelemetryManager : MonoBehaviour
 {
     public static TelemetryManager Instance;
 
-    [Header("·şÎñÆ÷ÅäÖÃ")]
+    [Header("æ°¸ä¹…æœåŠ¡å™¨é…ç½® (Google Form)")]
+    public string googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdkCkfbXt42BpSWf1-iaWgH0jOTxLP5gm9BCwjGmaqz_OiJJQ/formResponse";
 
-    public string serverEndpoint = "https://webhook.site/97b1f492-16e6-48a5-92dd-b264cd0ed38a";
+    [Header("è¡¨å• Entry ID æ˜ å°„")]
+    public string entryID_DeviceID = "entry.1219463742";
+    public string entryID_SubjectID = "entry.456655523";
+    public string entryID_Timestamp = "entry.591917006";
+    public string entryID_FullData = "entry.1734290061";
 
     private TelemetryPayload _payload;
     private string _localSavePath;
@@ -77,42 +81,34 @@ public class TelemetryManager : MonoBehaviour
 
         if (!PlayerPrefs.HasKey("PlayerUUID"))
         {
-            PlayerPrefs.SetString("PlayerUUID", System.Guid.NewGuid().ToString());
+            PlayerPrefs.SetString("PlayerUUID", Guid.NewGuid().ToString());
             PlayerPrefs.SetInt("Playthroughs", 1);
         }
         _payload.profile.user_uuid = PlayerPrefs.GetString("PlayerUUID");
         _payload.profile.total_playthroughs = PlayerPrefs.GetInt("Playthroughs");
+        _payload.current_session.session_start = DateTime.UtcNow.ToString("o");
 
-        _payload.current_session.session_start = System.DateTime.UtcNow.ToString("o");
-
-        Debug.Log($"¡¾¹Û²âÕßÆô¶¯¡¿UUID: {_payload.profile.user_uuid} | Êı¾İ½«±£´æÔÚ: {_localSavePath}");
+        Debug.Log($"ã€ç³»ç»Ÿå¯åŠ¨ã€‘æ•°æ®å¤‡ä»½è·¯å¾„: {_localSavePath}");
     }
-
 
     public void LogEvent(string type, string target, float duration = 0f, string extra = "")
     {
         TelemetryEvent newEvent = new TelemetryEvent
         {
-            timestamp = System.DateTime.UtcNow.ToString("o"),
+            timestamp = DateTime.UtcNow.ToString("o"),
             event_type = type,
             target_id = target,
             duration_sec = duration,
             extra_data = extra
         };
         _payload.current_session.events.Add(newEvent);
-
         SaveToLocal();
     }
 
-    /// <summary>
-    /// selection and time
-    /// </summary>
     public void LogChoiceHesitation(string choiceText, float hesitationSeconds)
     {
         LogEvent("choice_made", choiceText, hesitationSeconds, "ink_choice");
-        Debug.Log($"¡¾Ñ§Êõ¼ÇÂ¼¡¿Íæ¼ÒÃæ¶Ô [{choiceText}] ÓÌÔ¥ÁË {hesitationSeconds:F2} Ãë¡£");
     }
-
 
     public void SaveToLocal()
     {
@@ -122,29 +118,37 @@ public class TelemetryManager : MonoBehaviour
 
     public void UploadDataToServer()
     {
-        _payload.current_session.session_end = System.DateTime.UtcNow.ToString("o");
-        string json = JsonUtility.ToJson(_payload);
-        StartCoroutine(PostJsonData(serverEndpoint, json));
+        _payload.current_session.session_end = DateTime.UtcNow.ToString("o");
+
+        string deviceID = SystemInfo.deviceUniqueIdentifier; // è¯†åˆ«ç‰©ç†PC
+        string subjectID = PlayerPrefs.GetString("CurrentUser", "None");
+        string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+        string fullJsonData = JsonUtility.ToJson(_payload);
+
+        StartCoroutine(PostToGoogleForm(deviceID, subjectID, timestamp, fullJsonData));
     }
 
-    private IEnumerator PostJsonData(string url, string json)
+    private IEnumerator PostToGoogleForm(string devID, string subID, string time, string json)
     {
-        Debug.Log("¡¾³¢ÊÔÉÏ´«¹Û²âÊı¾İ¡¿...");
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
+        Debug.Log("ã€æ°¸ä¹…å­˜å‚¨ã€‘æ­£åœ¨åŒæ­¥æ•°æ®è‡³ Google Sheets...");
 
-        yield return request.SendWebRequest();
+        WWWForm form = new WWWForm();
+        form.AddField(entryID_DeviceID, devID);
+        form.AddField(entryID_SubjectID, subID);
+        form.AddField(entryID_Timestamp, time);
+        form.AddField(entryID_FullData, json);
 
-        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        using (UnityWebRequest request = UnityWebRequest.Post(googleFormUrl, form))
         {
-            Debug.LogError($"¡¾Êı¾İÉÏ´«Ê§°Ü¡¿: {request.error} | Êı¾İÒÑ±£ÁôÔÚ±¾µØ¡£");
-        }
-        else
-        {
-            Debug.Log("¡¾Êı¾İÉÏ´«³É¹¦£¡¡¿·şÎñÆ÷ÒÑ½ÓÊÕÍæ¼ÒĞĞÎªÍ¼Æ×¡£");
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"ã€å­˜å‚¨å¤±è´¥ã€‘: {request.error} | æ•°æ®å·²åœ¨æœ¬åœ°å¤‡ä»½ã€‚");
+            }
+            else
+            {
+            }
         }
     }
 
@@ -153,9 +157,7 @@ public class TelemetryManager : MonoBehaviour
         LogEvent("game_quit", "app_closed");
         SaveToLocal();
     }
-    /// <summary>
-    /// new savedata needs to claim the languages background.
-    /// </summary>
+
     public void SetPlayerProfile(string nativeLang, bool isMultilingual, string lockedLang, List<string> secondaryLangs)
     {
         _payload.profile.native_language = nativeLang;
@@ -167,16 +169,6 @@ public class TelemetryManager : MonoBehaviour
         PlayerPrefs.SetInt("Playthroughs", currentPlaythroughs);
         _payload.profile.total_playthroughs = currentPlaythroughs;
 
-        Debug.Log($"¡¾ÏµÍ³Ğ£×¼Íê±Ï¡¿Ä¸Óï: {nativeLang} | ¶àÓïÑÔÕß: {isMultilingual} | Ëø¶¨ÓïÑÔ: {lockedLang} | µ±Ç°ÖÜÄ¿: {currentPlaythroughs}");
         SaveToLocal();
-    }
-    void Update()
-    {
-        // for test only
-        if (Input.GetKeyDown(KeyCode.U))
-        {
-            Debug.Log("¡¾test¡¿ U ...");
-            UploadDataToServer();
-        }
     }
 }

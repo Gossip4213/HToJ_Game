@@ -12,12 +12,12 @@ public class CalibrationUIController : MonoBehaviour
     public TextMeshProUGUI warningText;
 
     [Header("第二层：外语审问 (动态显示面板)")]
-    public GameObject secondaryLangPanel; 
-    public Toggle[] secondaryLangToggles; 
-    public TMP_InputField otherLangInput; 
+    public GameObject secondaryLangPanel;
+    public Toggle[] secondaryLangToggles;
+    public TMP_InputField otherLangInput;
 
     [Header("场景设置")]
-    public string prologueSceneName = "PrologueScene";
+    public string prologueSceneName = "PrologueScene"; 
 
     void Start()
     {
@@ -40,7 +40,6 @@ public class CalibrationUIController : MonoBehaviour
             OnMultilingualToggled(multilingualToggle.isOn);
         }
     }
-    
 
     void OnDisable()
     {
@@ -78,6 +77,7 @@ public class CalibrationUIController : MonoBehaviour
             warningText.text = $"<color=red>{localizedWarning}</color>";
         }
     }
+
     private void OnMultilingualToggled(bool isOn)
     {
         if (secondaryLangPanel != null)
@@ -104,7 +104,7 @@ public class CalibrationUIController : MonoBehaviour
 
                     if (tmpLabel != null) collectedSecondaryLangs.Add(tmpLabel.text);
                     else if (legacyLabel != null) collectedSecondaryLangs.Add(legacyLabel.text);
-                    else collectedSecondaryLangs.Add(t.gameObject.name); 
+                    else collectedSecondaryLangs.Add(t.gameObject.name);
                 }
             }
 
@@ -114,6 +114,18 @@ public class CalibrationUIController : MonoBehaviour
             }
         }
 
+        string allProfiles = PlayerPrefs.GetString("AllProfiles", "");
+        string[] profiles = allProfiles.Split(new char[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+        int newId = profiles.Length + 1;
+        string newProfileName = "Subject_" + newId.ToString("D3");
+
+        if (string.IsNullOrEmpty(allProfiles)) allProfiles = newProfileName;
+        else allProfiles += "," + newProfileName;
+
+        PlayerPrefs.SetString("AllProfiles", allProfiles);
+        PlayerPrefs.SetString("CurrentUser", newProfileName);
+
         if (TelemetryManager.Instance != null)
         {
             TelemetryManager.Instance.SetPlayerProfile(nativeLang, isMulti, currentLang, collectedSecondaryLangs);
@@ -122,12 +134,24 @@ public class CalibrationUIController : MonoBehaviour
         PlayerPrefs.SetInt("HasLockedLanguage", 1);
         PlayerPrefs.Save();
 
-        Debug.Log("data is recorded...");
+        Debug.Log($"【系统】已建立观测档案：{newProfileName}。数据已刻录...");
         SceneManager.LoadScene(prologueSceneName);
     }
 
     public void OnCancelClicked()
     {
         gameObject.SetActive(false);
+
+        MainMenuController mmc = Object.FindFirstObjectByType<MainMenuController>();
+
+        if (mmc != null)
+        {
+            mmc.ShowMenu();
+            Debug.Log("已取消建档，返回主菜单。");
+        }
+        else
+        {
+            Debug.LogWarning("找不到 MainMenuController，无法返回主菜单。");
+        }
     }
 }

@@ -17,6 +17,7 @@ public class GameSystem : MonoBehaviour
 
     [Header("Audio")]
     public AudioSource bgmSource;
+    public AudioSource sfxSource;
 
     void Awake()
     {
@@ -40,6 +41,8 @@ public class GameSystem : MonoBehaviour
         {
             bgmSource.Play();
         }
+        float savedSfxVol = PlayerPrefs.GetFloat("SFXVol", 0.75f);
+        SetSFXVolume(savedSfxVol);
     }
 
     void InitializeSystem()
@@ -50,7 +53,13 @@ public class GameSystem : MonoBehaviour
 
         Debug.Log($"[System] System initialized. Default Language: {CurrentSave.languageCode}");
     }
-
+    public void SetSFXVolume(float volume)
+    {
+        if (sfxSource != null)
+        {
+            sfxSource.volume = volume;
+        }
+    }
     public string GetSavePath(int slotIndex)
     {
         return Path.Combine(Application.persistentDataPath, $"save_data_{slotIndex}.json");

@@ -172,6 +172,7 @@ public class InGameMenuController : MonoBehaviour
     public void SetSFXVolume(float val)
     {
         PlayerPrefs.SetFloat("SFXVol", val);
+        if (GameSystem.Instance != null) GameSystem.Instance.SetSFXVolume(val); 
     }
 
     public void SetTextSpeed(float val)

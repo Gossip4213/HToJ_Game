@@ -338,6 +338,14 @@ public class DialogueController : MonoBehaviour
                         TelemetryManager.Instance.UploadDataToServer();
                     }
                 }
+                else if (tagValue.StartsWith("meta_"))
+                {
+                    string currentUser = PlayerPrefs.GetString("CurrentUser", "Guest");
+
+                    PlayerPrefs.SetInt($"{currentUser}_{tagValue}", 1);
+                    PlayerPrefs.Save();
+                    Debug.Log($"[meta] {tagValue} ÓÀ¾Ã¼ÇÂ¼µ½ {currentUser} ");
+                }
             }
             else if (tagKey == "portrait")
             {
@@ -358,6 +366,27 @@ public class DialogueController : MonoBehaviour
                 if (ScenarioManager.Instance != null)
                 {
                     ScenarioManager.Instance.ToggleProp(tagValue, false);
+                }
+            }
+            else if (tagKey == "bg")
+            {
+                if (ScenarioManager.Instance != null)
+                {
+                    ScenarioManager.Instance.ChangeBG(tagValue);
+                }
+            }
+            else if (tagKey == "bgm")
+            {
+                if (ScenarioManager.Instance != null)
+                {
+                    ScenarioManager.Instance.ChangeBGM(tagValue);
+                }
+            }
+            else if (tagKey == "sfx")
+            {
+                if (ScenarioManager.Instance != null)
+                {
+                    ScenarioManager.Instance.PlaySFX(tagValue);
                 }
             }
         }
