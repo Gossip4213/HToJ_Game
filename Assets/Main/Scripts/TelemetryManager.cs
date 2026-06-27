@@ -1,10 +1,10 @@
-﻿using System.Collections;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Networking;
 using System.IO;
 using System.Text;
-using System;
+using UnityEngine;
+using UnityEngine.Networking;
 
 [System.Serializable]
 public class TelemetryEvent
@@ -19,6 +19,9 @@ public class TelemetryEvent
 [System.Serializable]
 public class GameSession
 {
+    public string session_id;
+    public string profile_id;
+    public string game_version;
     public string session_start;
     public string session_end;
     public List<TelemetryEvent> events = new List<TelemetryEvent>();
@@ -28,9 +31,10 @@ public class GameSession
 public class PlayerProfile
 {
     public string user_uuid;
+    public string subject_id;
     public string native_language;
     public bool is_multilingual;
-    public List<string> secondary_languages;
+    public List<string> secondary_languages = new List<string>();
     public string locked_game_language;
     public int total_playthroughs;
 }
@@ -38,6 +42,7 @@ public class PlayerProfile
 [System.Serializable]
 public class TelemetryPayload
 {
+    public int schema_version = 1;
     public PlayerProfile profile;
     public GameSession current_session;
 }
@@ -57,6 +62,8 @@ public class TelemetryManager : MonoBehaviour
 
     private TelemetryPayload _payload;
     private string _localSavePath;
+    private string _activeProfileId;
+    private bool _profileConfiguredThisSession;
 
     void Awake()
     {
@@ -74,25 +81,71 @@ public class TelemetryManager : MonoBehaviour
 
     private void InitTelemetry()
     {
-        _localSavePath = Application.persistentDataPath + "/telemetry_log.json";
-        _payload = new TelemetryPayload();
-        _payload.profile = new PlayerProfile();
-        _payload.current_session = new GameSession();
+        EnsureAnonymousInstallId();
+        StartNewSession(StoragePaths.CurrentProfileId);
+    }
 
+    private void EnsureAnonymousInstallId()
+    {
         if (!PlayerPrefs.HasKey("PlayerUUID"))
         {
             PlayerPrefs.SetString("PlayerUUID", Guid.NewGuid().ToString());
-            PlayerPrefs.SetInt("Playthroughs", 1);
+            PlayerPrefs.SetInt("Playthroughs", 0);
+            PlayerPrefs.Save();
         }
-        _payload.profile.user_uuid = PlayerPrefs.GetString("PlayerUUID");
-        _payload.profile.total_playthroughs = PlayerPrefs.GetInt("Playthroughs");
-        _payload.current_session.session_start = DateTime.UtcNow.ToString("o");
+    }
 
-        Debug.Log($"【系统启动】数据备份路径: {_localSavePath}");
+    private void StartNewSession(string profileId)
+    {
+        _activeProfileId = string.IsNullOrWhiteSpace(profileId)
+            ? StoragePaths.CurrentProfileId
+            : profileId;
+
+        string sessionId = $"{DateTime.UtcNow:yyyyMMdd_HHmmss}_{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+        _localSavePath = StoragePaths.GetTelemetrySessionPath(sessionId, _activeProfileId);
+        _profileConfiguredThisSession = false;
+
+        _payload = new TelemetryPayload
+        {
+            schema_version = 1,
+            profile = new PlayerProfile
+            {
+                user_uuid = PlayerPrefs.GetString("PlayerUUID"),
+                subject_id = _activeProfileId,
+                total_playthroughs = PlayerPrefs.GetInt("Playthroughs", 0)
+            },
+            current_session = new GameSession
+            {
+                session_id = sessionId,
+                profile_id = _activeProfileId,
+                game_version = Application.version,
+                session_start = DateTime.UtcNow.ToString("o")
+            }
+        };
+
+        SaveToLocal();
+        Debug.Log($"[Telemetry] Session started: {_localSavePath}");
+    }
+
+    public void RefreshForCurrentProfile()
+    {
+        string currentProfileId = StoragePaths.CurrentProfileId;
+        if (currentProfileId == _activeProfileId)
+        {
+            return;
+        }
+
+        FinalizeCurrentSession();
+        StartNewSession(currentProfileId);
     }
 
     public void LogEvent(string type, string target, float duration = 0f, string extra = "")
     {
+        if (_payload == null || _payload.current_session == null)
+        {
+            InitTelemetry();
+        }
+
         TelemetryEvent newEvent = new TelemetryEvent
         {
             timestamp = DateTime.UtcNow.ToString("o"),
@@ -101,6 +154,7 @@ public class TelemetryManager : MonoBehaviour
             duration_sec = duration,
             extra_data = extra
         };
+
         _payload.current_session.events.Add(newEvent);
         SaveToLocal();
     }
@@ -112,29 +166,50 @@ public class TelemetryManager : MonoBehaviour
 
     public void SaveToLocal()
     {
-        string json = JsonUtility.ToJson(_payload, true);
-        File.WriteAllText(_localSavePath, json);
+        if (_payload == null || string.IsNullOrEmpty(_localSavePath))
+        {
+            return;
+        }
+
+        try
+        {
+            string json = JsonUtility.ToJson(_payload, true);
+            WriteTextSafely(_localSavePath, json);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError($"[Telemetry] Local backup failed: {exception.Message}");
+        }
     }
 
     public void UploadDataToServer()
     {
-        _payload.current_session.session_end = DateTime.UtcNow.ToString("o");
+        if (_payload == null)
+        {
+            Debug.LogWarning("[Telemetry] No payload is available to upload.");
+            return;
+        }
 
-        string deviceID = SystemInfo.deviceUniqueIdentifier; // 识别物理PC
-        string subjectID = PlayerPrefs.GetString("CurrentUser", "None");
+        _payload.current_session.session_end = DateTime.UtcNow.ToString("o");
+        SaveToLocal();
+
+        // Keep the existing form field for compatibility, but send the anonymous install UUID
+        // rather than Unity's physical-device identifier.
+        string anonymousInstallId = _payload.profile.user_uuid;
+        string subjectId = _payload.profile.subject_id;
         string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
         string fullJsonData = JsonUtility.ToJson(_payload);
 
-        StartCoroutine(PostToGoogleForm(deviceID, subjectID, timestamp, fullJsonData));
+        StartCoroutine(PostToGoogleForm(anonymousInstallId, subjectId, timestamp, fullJsonData));
     }
 
-    private IEnumerator PostToGoogleForm(string devID, string subID, string time, string json)
+    private IEnumerator PostToGoogleForm(string anonymousId, string subjectId, string time, string json)
     {
-        Debug.Log("【永久存储】正在同步数据至 Google Sheets...");
+        Debug.Log("[Telemetry] Uploading session data...");
 
         WWWForm form = new WWWForm();
-        form.AddField(entryID_DeviceID, devID);
-        form.AddField(entryID_SubjectID, subID);
+        form.AddField(entryID_DeviceID, anonymousId);
+        form.AddField(entryID_SubjectID, subjectId);
         form.AddField(entryID_Timestamp, time);
         form.AddField(entryID_FullData, json);
 
@@ -144,31 +219,88 @@ public class TelemetryManager : MonoBehaviour
 
             if (request.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogError($"【存储失败】: {request.error} | 数据已在本地备份。");
+                Debug.LogError($"[Telemetry] Upload failed: {request.error}. Local backup remains available.");
             }
             else
             {
+                Debug.Log("[Telemetry] Upload completed successfully.");
             }
         }
     }
 
     private void OnApplicationQuit()
     {
-        LogEvent("game_quit", "app_closed");
-        SaveToLocal();
+        if (_payload == null)
+        {
+            return;
+        }
+
+        _payload.current_session.events.Add(new TelemetryEvent
+        {
+            timestamp = DateTime.UtcNow.ToString("o"),
+            event_type = "game_quit",
+            target_id = "app_closed",
+            duration_sec = 0f,
+            extra_data = ""
+        });
+
+        FinalizeCurrentSession();
     }
 
     public void SetPlayerProfile(string nativeLang, bool isMultilingual, string lockedLang, List<string> secondaryLangs)
     {
+        RefreshForCurrentProfile();
+
         _payload.profile.native_language = nativeLang;
         _payload.profile.is_multilingual = isMultilingual;
         _payload.profile.locked_game_language = lockedLang;
-        _payload.profile.secondary_languages = secondaryLangs != null ? new List<string>(secondaryLangs) : new List<string>();
+        _payload.profile.secondary_languages = secondaryLangs != null
+            ? new List<string>(secondaryLangs)
+            : new List<string>();
 
-        int currentPlaythroughs = PlayerPrefs.GetInt("Playthroughs", 0) + 1;
-        PlayerPrefs.SetInt("Playthroughs", currentPlaythroughs);
-        _payload.profile.total_playthroughs = currentPlaythroughs;
+        if (!_profileConfiguredThisSession)
+        {
+            int currentPlaythroughs = PlayerPrefs.GetInt("Playthroughs", 0) + 1;
+            PlayerPrefs.SetInt("Playthroughs", currentPlaythroughs);
+            PlayerPrefs.Save();
+            _payload.profile.total_playthroughs = currentPlaythroughs;
+            _profileConfiguredThisSession = true;
+        }
 
         SaveToLocal();
+    }
+
+    private void FinalizeCurrentSession()
+    {
+        if (_payload == null || _payload.current_session == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(_payload.current_session.session_end))
+        {
+            _payload.current_session.session_end = DateTime.UtcNow.ToString("o");
+        }
+
+        SaveToLocal();
+    }
+
+    private static void WriteTextSafely(string path, string content)
+    {
+        string directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        string temporaryPath = path + ".tmp";
+        File.WriteAllText(temporaryPath, content, Encoding.UTF8);
+
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
+        File.Move(temporaryPath, path);
     }
 }
