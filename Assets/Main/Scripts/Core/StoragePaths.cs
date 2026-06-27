@@ -20,7 +20,10 @@ public static class StoragePaths
 
     public static string GetProfileDirectory(string profileId = null)
     {
-        string safeProfileId = SanitizeProfileId(profileId);
+        string safeProfileId = string.IsNullOrWhiteSpace(profileId)
+            ? CurrentProfileId
+            : SanitizeProfileId(profileId);
+
         string path = Path.Combine(Application.persistentDataPath, ProfilesDirectoryName, safeProfileId);
         Directory.CreateDirectory(path);
         return path;
