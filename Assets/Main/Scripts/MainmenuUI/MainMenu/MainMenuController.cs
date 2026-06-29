@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -9,13 +9,13 @@ public class MainMenuController : MonoBehaviour
     [Header("Panels")]
     public GameObject panelMenu;
     public GameObject panelSettings;
-    public GameObject panelCalibration; 
+    public GameObject panelCalibration;
 
     [Header("UI Elements")]
     public Button btnContinue;
     public TMP_Dropdown langDropdown;
     public TMP_Dropdown resDropdown;
-    public TMP_Dropdown profileDropdown; 
+    public TMP_Dropdown profileDropdown;
     public Toggle windowedToggle;
     public Toggle skipUnreadToggle;
     public Slider musicSlider;
@@ -27,6 +27,7 @@ public class MainMenuController : MonoBehaviour
 
     [Header("Managers")]
     public SaveLoadMenuController saveLoadMenu;
+    public CalibrationUIController calibrationController;
 
     private Resolution[] resolutions;
     public static System.Action<float> OnFontSizeChanged;
@@ -36,18 +37,19 @@ public class MainMenuController : MonoBehaviour
     void Start()
     {
         InitSettingsUI();
-        InitProfileSystem(); 
+        InitProfileSystem();
 
         if (langDropdown != null)
         {
             langDropdown.onValueChanged.AddListener(OnLanguageChanged);
         }
+
         CheckContinueButton();
     }
 
     void InitProfileSystem()
     {
-        ShowMenu();
+        SubjectProfileService.EnsureLegacyProfiles();
         RefreshProfileDropdown();
 
         if (profileDropdown != null)
@@ -55,68 +57,172 @@ public class MainMenuController : MonoBehaviour
             profileDropdown.onValueChanged.RemoveAllListeners();
             profileDropdown.onValueChanged.AddListener(OnProfileDropdownChanged);
         }
+
+        if (!SubjectProfileService.HasAnyActiveProfile())
+        {
+            ShowCalibrationPanel(editExisting: false, profileCreationRequired: true);
+            return;
+        }
+
+        ShowMenu();
+        SyncRuntimeToCurrentProfile(logSwitch: false);
     }
 
     void RefreshProfileDropdown()
     {
-        if (profileDropdown == null) return;
+        if (profileDropdown == null)
+        {
+            return;
+        }
 
-        string allProfiles = PlayerPrefs.GetString("AllProfiles", "");
-        string[] profiles = allProfiles.Split(new char[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries);
-
+        List<string> profiles = SubjectProfileService.GetActiveProfileIds();
         profileDropdown.ClearOptions();
-        List<string> options = new List<string>(profiles);
-        profileDropdown.AddOptions(options);
+        profileDropdown.AddOptions(profiles);
 
-        string current = PlayerPrefs.GetString("CurrentUser", "");
-        int currentIndex = options.IndexOf(current);
+        string currentProfile = SubjectProfileService.GetCurrentProfileId();
+        int currentIndex = profiles.IndexOf(currentProfile);
         if (currentIndex >= 0)
         {
-            profileDropdown.value = currentIndex;
+            profileDropdown.SetValueWithoutNotify(currentIndex);
         }
+
         profileDropdown.RefreshShownValue();
     }
 
     public void OnProfileDropdownChanged(int index)
     {
-        if (profileDropdown == null) return;
+        if (profileDropdown == null || index < 0 || index >= profileDropdown.options.Count)
+        {
+            return;
+        }
+
         string selectedProfile = profileDropdown.options[index].text;
+        if (!SubjectProfileService.SetCurrentProfile(selectedProfile))
+        {
+            Debug.LogError($"[SubjectProfile] Could not switch to {selectedProfile}.");
+            return;
+        }
 
-        PlayerPrefs.SetString("CurrentUser", selectedProfile);
-        PlayerPrefs.Save();
-
-        Debug.Log($"【系统】已将观测对象切换至：{selectedProfile}");
-        CheckContinueButton(); 
+        SyncRuntimeToCurrentProfile(logSwitch: true);
+        CheckContinueButton();
+        Debug.Log($"[SubjectProfile] Current subject: {selectedProfile}");
     }
+
+    private void SyncRuntimeToCurrentProfile(bool logSwitch)
+    {
+        string currentProfileId = SubjectProfileService.GetCurrentProfileId();
+        SubjectProfileData profile = SubjectProfileService.LoadProfile(currentProfileId, createIfMissing: true);
+        if (profile == null)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(profile.lockedGameLanguage))
+        {
+            PlayerPrefs.SetString("SelectedLanguage", profile.lockedGameLanguage);
+            PlayerPrefs.Save();
+
+            if (LocalizationManager.Instance != null)
+            {
+                LocalizationManager.Instance.ChangeLanguage(profile.lockedGameLanguage);
+            }
+        }
+
+        if (GameSystem.Instance != null)
+        {
+            GameSystem.Instance.BeginNewGame();
+        }
+
+        if (TelemetryManager.Instance != null)
+        {
+            TelemetryManager.Instance.RefreshForCurrentProfile();
+            TelemetryManager.Instance.UpdateSubjectProfile(profile);
+            if (logSwitch)
+            {
+                TelemetryManager.Instance.LogEvent("profile_switched", currentProfileId);
+            }
+        }
+    }
+
     public void OnBtnShowCalibrationClick()
     {
-        ShowCalibrationPanel();
+        ShowCalibrationPanel(editExisting: false, profileCreationRequired: false);
     }
 
-    void ShowCalibrationPanel()
+    public void OnBtnEditCurrentProfileClick()
+    {
+        if (!SubjectProfileService.HasAnyActiveProfile())
+        {
+            ShowCalibrationPanel(editExisting: false, profileCreationRequired: true);
+            return;
+        }
+
+        ShowCalibrationPanel(editExisting: true, profileCreationRequired: false);
+    }
+
+    private void ShowCalibrationPanel(bool editExisting, bool profileCreationRequired)
     {
         if (panelMenu != null) panelMenu.SetActive(false);
         if (panelSettings != null) panelSettings.SetActive(false);
         if (panelCalibration != null) panelCalibration.SetActive(true);
+
+        CalibrationUIController controller = GetCalibrationController();
+        if (controller == null)
+        {
+            Debug.LogError("[SubjectProfile] CalibrationUIController is not assigned or present in the calibration panel.");
+            return;
+        }
+
+        if (editExisting)
+        {
+            controller.OpenEditMode(SubjectProfileService.GetCurrentProfileId());
+        }
+        else
+        {
+            controller.OpenCreateMode(profileCreationRequired);
+        }
+    }
+
+    private CalibrationUIController GetCalibrationController()
+    {
+        if (calibrationController != null)
+        {
+            return calibrationController;
+        }
+
+        if (panelCalibration != null)
+        {
+            calibrationController = panelCalibration.GetComponentInChildren<CalibrationUIController>(true);
+        }
+
+        return calibrationController;
+    }
+
+    public void OnSubjectProfileSaved(string subjectId)
+    {
+        SubjectProfileService.SetCurrentProfile(subjectId);
+        RefreshProfileDropdown();
+        SyncRuntimeToCurrentProfile(logSwitch: false);
+        ShowMenu();
+        CheckContinueButton();
     }
 
     public void OnBtnStartClick()
     {
-        Debug.Log("Start New Game request...");
-        if (GameSystem.Instance != null) GameSystem.Instance.isLoadingFromSave = false;
-
-        string currentProfile = PlayerPrefs.GetString("CurrentUser", "");
-
-        if (string.IsNullOrEmpty(currentProfile))
+        string currentProfile = SubjectProfileService.GetCurrentProfileId();
+        if (string.IsNullOrWhiteSpace(currentProfile))
         {
-            Debug.Log("无档案，拦截 Start ...");
-            ShowCalibrationPanel();
+            ShowCalibrationPanel(editExisting: false, profileCreationRequired: true);
+            return;
         }
-        else
+
+        if (GameSystem.Instance != null)
         {
-            Debug.Log($" {currentProfile} welcome...");
-            UnityEngine.SceneManagement.SceneManager.LoadScene("Prologue");
+            GameSystem.Instance.BeginNewGame();
         }
+
+        Debug.Log($"[System] Starting a new game for {currentProfile}.");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Prologue");
     }
 
     public void ShowMenu()
@@ -128,14 +234,18 @@ public class MainMenuController : MonoBehaviour
 
     void CheckContinueButton()
     {
-        bool hasSave = false;
-        if (GameSystem.Instance != null)
+        bool hasSave = GameSystem.Instance != null && GameSystem.Instance.HasAnySaveFile();
+        if (btnContinue == null)
         {
-            hasSave = GameSystem.Instance.HasAnySaveFile();
+            return;
         }
+
         btnContinue.interactable = hasSave;
-        var text = btnContinue.GetComponentInChildren<TextMeshProUGUI>();
-        if (text != null) text.alpha = hasSave ? 1f : 0.5f;
+        TextMeshProUGUI text = btnContinue.GetComponentInChildren<TextMeshProUGUI>();
+        if (text != null)
+        {
+            text.alpha = hasSave ? 1f : 0.5f;
+        }
     }
 
     public void OnBtnContinueClick()
@@ -164,7 +274,6 @@ public class MainMenuController : MonoBehaviour
         Application.Quit();
 #endif
     }
-
 
     void InitSettingsUI()
     {
@@ -341,7 +450,7 @@ public class MainMenuController : MonoBehaviour
             sizePreviewText.fontSize = previewSize;
         }
 
-        if (OnFontSizeChanged != null) OnFontSizeChanged.Invoke(scaleFactor);
+        OnFontSizeChanged?.Invoke(scaleFactor);
     }
 
     public void OnLanguageChanged(int index)
