@@ -139,6 +139,24 @@ public class TelemetryManager : MonoBehaviour
         StartNewSession(currentProfileId);
     }
 
+    public void UpdateSubjectProfile(SubjectProfileData profile)
+    {
+        if (profile == null)
+        {
+            return;
+        }
+
+        RefreshForCurrentProfile();
+        _payload.profile.subject_id = profile.subjectId;
+        _payload.profile.native_language = profile.nativeLanguage;
+        _payload.profile.is_multilingual = profile.isMultilingual;
+        _payload.profile.secondary_languages = profile.secondaryLanguages != null
+            ? new List<string>(profile.secondaryLanguages)
+            : new List<string>();
+        _payload.profile.locked_game_language = profile.lockedGameLanguage;
+        SaveToLocal();
+    }
+
     public void LogEvent(string type, string target, float duration = 0f, string extra = "")
     {
         if (_payload == null || _payload.current_session == null)
@@ -193,8 +211,6 @@ public class TelemetryManager : MonoBehaviour
         _payload.current_session.session_end = DateTime.UtcNow.ToString("o");
         SaveToLocal();
 
-        // Keep the existing form field for compatibility, but send the anonymous install UUID
-        // rather than Unity's physical-device identifier.
         string anonymousInstallId = _payload.profile.user_uuid;
         string subjectId = _payload.profile.subject_id;
         string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
