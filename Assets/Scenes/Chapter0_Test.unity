@@ -9380,7 +9380,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -5862917057196062656, guid: 182554fb192bfca4e865ebc62ea60023, type: 3}
+  m_Sprite: {fileID: -9180348761582821182, guid: cb7a9a96c44241b48b3e654be0807d08, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -9977,8 +9977,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d8fabee3ce06804fa0cef2fca5c5122, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  portraitDisplay: {fileID: 0}
-  portraitSprites: []
+  portraitDisplay: {fileID: 1768323942}
+  portraitSprites:
+  - {fileID: -9180348761582821182, guid: cb7a9a96c44241b48b3e654be0807d08, type: 3}
+  - {fileID: -6766849782131972544, guid: a302bc3ec18a01d45ba54413d02b05b4, type: 3}
   bgDisplay: {fileID: 0}
   bgSprites: []
   sceneProps: []

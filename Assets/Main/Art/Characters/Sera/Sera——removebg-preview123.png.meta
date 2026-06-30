@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 60355d6d5db8f1149aadda7acfab0ade
+guid: 9bbe6bccda4934141b041aed571e4867
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -61366132470847287
-    second: Sera_Test-removebg-preview_0
+      213: 5370725486649526362
+    second: "Sera\u2014\u2014removebg-preview123_0"
   - first:
-      213: -8479589034057211463
-    second: Sera_Test-removebg-preview_1
+      213: 470706749259787387
+    second: "Sera\u2014\u2014removebg-preview123_1"
   - first:
-      213: 5119690943684297950
-    second: Sera_Test-removebg-preview_2
+      213: 5043197463749263784
+    second: "Sera\u2014\u2014removebg-preview123_2"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -106,7 +106,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Sera_Test-removebg-preview_0
+      name: "Sera\u2014\u2014removebg-preview123_0"
       rect:
         serializedVersion: 2
         x: 0
@@ -121,14 +121,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9c8e5d0e3dbf52ff0800000000000000
-      internalID: -61366132470847287
+      spriteID: a58c1e1ff56a88a40800000000000000
+      internalID: 5370725486649526362
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sera_Test-removebg-preview_1
+      name: "Sera\u2014\u2014removebg-preview123_1"
       rect:
         serializedVersion: 2
         x: 287
@@ -143,14 +143,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9b1e8b743b2725a80800000000000000
-      internalID: -8479589034057211463
+      spriteID: b7c22076b49488600800000000000000
+      internalID: 470706749259787387
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sera_Test-removebg-preview_2
+      name: "Sera\u2014\u2014removebg-preview123_2"
       rect:
         serializedVersion: 2
         x: 442
@@ -165,8 +165,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ed4461ab9cbcc0740800000000000000
-      internalID: 5119690943684297950
+      spriteID: 8a10dee8f590df540800000000000000
+      internalID: 5043197463749263784
       vertices: []
       indices: 
       edges: []
@@ -185,9 +185,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Sera_Test-removebg-preview_0: -61366132470847287
-      Sera_Test-removebg-preview_1: -8479589034057211463
-      Sera_Test-removebg-preview_2: 5119690943684297950
+      "Sera\u2014\u2014removebg-preview123_0": 5370725486649526362
+      "Sera\u2014\u2014removebg-preview123_1": 470706749259787387
+      "Sera\u2014\u2014removebg-preview123_2": 5043197463749263784
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
