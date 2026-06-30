@@ -13,7 +13,7 @@ Perhaps. But the data never lies. Thank you for participating in this observatio
 #action: upload_data
 
 #speaker: System
-(Data link established. Uploading records...)
+(Uploading records...)
 
 
 #load_scene: MainMenu
