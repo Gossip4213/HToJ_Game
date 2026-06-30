@@ -11,6 +11,10 @@ public class CalibrationUIController : MonoBehaviour
     public Toggle multilingualToggle;
     public TextMeshProUGUI warningText;
 
+    [Header("档案游戏语言")]
+    [Tooltip("Game-language dropdown for this subject. Options are expected in the order EN, ZH_CN, JP, KR.")]
+    public TMP_Dropdown gameLanguageDropdown;
+
     [Header("第二层：外语审问 (动态显示面板)")]
     public GameObject secondaryLangPanel;
     public Toggle[] secondaryLangToggles;
@@ -26,15 +30,24 @@ public class CalibrationUIController : MonoBehaviour
 
     void Start()
     {
+        ResolveGameLanguageDropdown();
+
         if (multilingualToggle != null)
         {
             multilingualToggle.onValueChanged.RemoveListener(OnMultilingualToggled);
             multilingualToggle.onValueChanged.AddListener(OnMultilingualToggled);
         }
+
+        if (gameLanguageDropdown != null)
+        {
+            gameLanguageDropdown.onValueChanged.RemoveListener(OnGameLanguagePreviewChanged);
+            gameLanguageDropdown.onValueChanged.AddListener(OnGameLanguagePreviewChanged);
+        }
     }
 
     void OnEnable()
     {
+        ResolveGameLanguageDropdown();
         UpdateWarningText();
 
         if (LocalizationManager.Instance != null)
@@ -62,7 +75,9 @@ public class CalibrationUIController : MonoBehaviour
         _profileCreationRequired = profileCreationRequired;
         _editingSubjectId = string.Empty;
 
+        ResolveGameLanguageDropdown();
         ResetForm();
+        SetGameLanguageDropdown(PlayerPrefs.GetString("SelectedLanguage", "EN"));
         SetModeLabels("Create Subject", "Create");
         UpdateWarningText();
     }
@@ -80,6 +95,7 @@ public class CalibrationUIController : MonoBehaviour
         _profileCreationRequired = false;
         _editingSubjectId = subjectId;
 
+        ResolveGameLanguageDropdown();
         PopulateForm(profile);
         SetModeLabels($"Edit {subjectId}", "Save Changes");
         UpdateWarningText();
@@ -122,6 +138,7 @@ public class CalibrationUIController : MonoBehaviour
     {
         ResetForm();
         SelectDropdownOption(nativeLangDropdown, profile.nativeLanguage);
+        SetGameLanguageDropdown(profile.lockedGameLanguage);
 
         if (multilingualToggle != null)
         {
@@ -172,6 +189,32 @@ public class CalibrationUIController : MonoBehaviour
         OnMultilingualToggled(profile.isMultilingual);
     }
 
+    private void ResolveGameLanguageDropdown()
+    {
+        if (gameLanguageDropdown != null)
+        {
+            return;
+        }
+
+        TMP_Dropdown[] dropdowns = GetComponentsInChildren<TMP_Dropdown>(true);
+        foreach (TMP_Dropdown dropdown in dropdowns)
+        {
+            if (dropdown == null || dropdown == nativeLangDropdown)
+            {
+                continue;
+            }
+
+            string objectName = dropdown.gameObject.name.ToLowerInvariant();
+            if (objectName.Contains("game")
+                || objectName.Contains("language")
+                || objectName.Contains("lang"))
+            {
+                gameLanguageDropdown = dropdown;
+                return;
+            }
+        }
+    }
+
     private void SelectDropdownOption(TMP_Dropdown dropdown, string optionText)
     {
         if (dropdown == null || string.IsNullOrWhiteSpace(optionText))
@@ -203,17 +246,14 @@ public class CalibrationUIController : MonoBehaviour
         }
     }
 
+    private void OnGameLanguagePreviewChanged(int index)
+    {
+        UpdateWarningText();
+    }
+
     private void UpdateWarningText()
     {
-        string lockedLanguage = PlayerPrefs.GetString("SelectedLanguage", "EN");
-        if (_isEditMode)
-        {
-            SubjectProfileData profile = SubjectProfileService.LoadProfile(_editingSubjectId, createIfMissing: false);
-            if (profile != null && !string.IsNullOrWhiteSpace(profile.lockedGameLanguage))
-            {
-                lockedLanguage = profile.lockedGameLanguage;
-            }
-        }
+        string selectedLanguage = GetSelectedGameLanguage();
 
         if (warningText == null)
         {
@@ -221,27 +261,27 @@ public class CalibrationUIController : MonoBehaviour
         }
 
         string localizedWarning;
-        switch (lockedLanguage)
+        switch (selectedLanguage)
         {
             case "ZH_CN":
                 localizedWarning = _isEditMode
-                    ? $"正在编辑 {_editingSubjectId}。游戏语言 [{lockedLanguage}] 保持锁定。"
-                    : $"警告：本档案游戏语言 [{lockedLanguage}] 将被锁定。";
+                    ? $"正在编辑 {_editingSubjectId}。保存后，本档案将使用中文；游戏过程中不会临时切换。"
+                    : "保存后，本档案将使用中文；之后可从档案管理或主菜单设置修改。";
                 break;
             case "JP":
                 localizedWarning = _isEditMode
-                    ? $"{_editingSubjectId} を編集中です。ゲーム言語 [{lockedLanguage}] は固定されています。"
-                    : $"警告: ゲーム言語 [{lockedLanguage}] はこのセーブデータに固定されます。";
+                    ? $"{_editingSubjectId} を編集中です。保存後、このプロフィールの言語は日本語になります。"
+                    : "保存後、このプロフィールのゲーム言語は日本語になります。";
                 break;
             case "KR":
                 localizedWarning = _isEditMode
-                    ? $"{_editingSubjectId} 편집 중입니다. 게임 언어 [{lockedLanguage}]은 고정됩니다."
-                    : $"경고: 게임 언어 [{lockedLanguage}]은 이 저장 데이터에 고정됩니다.";
+                    ? $"{_editingSubjectId} 편집 중입니다. 저장 후 이 프로필의 게임 언어는 한국어가 됩니다."
+                    : "저장 후 이 프로필의 게임 언어는 한국어가 됩니다.";
                 break;
             default:
                 localizedWarning = _isEditMode
-                    ? $"Editing {_editingSubjectId}. Game language [{lockedLanguage}] remains locked."
-                    : $"Warning: game language [{lockedLanguage}] will be locked for this subject.";
+                    ? $"Editing {_editingSubjectId}. After saving, this subject will use English."
+                    : "After saving, this subject will use English. It can be changed later from profile management or main-menu settings.";
                 break;
         }
 
@@ -267,6 +307,7 @@ public class CalibrationUIController : MonoBehaviour
         string nativeLanguage = nativeLangDropdown.options[nativeLangDropdown.value].text;
         bool isMultilingual = multilingualToggle != null && multilingualToggle.isOn;
         List<string> secondaryLanguages = CollectSecondaryLanguages(isMultilingual);
+        string selectedGameLanguage = GetSelectedGameLanguage();
         SubjectProfileData savedProfile;
 
         if (_isEditMode)
@@ -281,6 +322,7 @@ public class CalibrationUIController : MonoBehaviour
             savedProfile.nativeLanguage = nativeLanguage;
             savedProfile.isMultilingual = isMultilingual;
             savedProfile.secondaryLanguages = secondaryLanguages;
+            savedProfile.lockedGameLanguage = selectedGameLanguage;
 
             if (!SubjectProfileService.SaveProfile(savedProfile))
             {
@@ -295,12 +337,11 @@ public class CalibrationUIController : MonoBehaviour
         }
         else
         {
-            string lockedLanguage = PlayerPrefs.GetString("SelectedLanguage", "EN");
             savedProfile = SubjectProfileService.CreateProfile(
                 nativeLanguage,
                 isMultilingual,
                 secondaryLanguages,
-                lockedLanguage);
+                selectedGameLanguage);
 
             PlayerPrefs.SetInt("HasLockedLanguage", 1);
             PlayerPrefs.Save();
@@ -310,7 +351,7 @@ public class CalibrationUIController : MonoBehaviour
                 TelemetryManager.Instance.SetPlayerProfile(
                     nativeLanguage,
                     isMultilingual,
-                    lockedLanguage,
+                    selectedGameLanguage,
                     secondaryLanguages);
             }
 
@@ -320,7 +361,7 @@ public class CalibrationUIController : MonoBehaviour
             }
         }
 
-        Debug.Log($"[SubjectProfile] Saved profile: {savedProfile.subjectId}");
+        Debug.Log($"[SubjectProfile] Saved profile: {savedProfile.subjectId}; game language: {selectedGameLanguage}");
 
         MainMenuController mainMenu = FindFirstObjectByType<MainMenuController>();
         if (mainMenu != null)
@@ -329,7 +370,123 @@ public class CalibrationUIController : MonoBehaviour
         }
         else
         {
+            ApplyLanguageImmediately(selectedGameLanguage);
             gameObject.SetActive(false);
+        }
+    }
+
+    private string GetSelectedGameLanguage()
+    {
+        ResolveGameLanguageDropdown();
+        if (gameLanguageDropdown == null || gameLanguageDropdown.options.Count == 0)
+        {
+            if (_isEditMode)
+            {
+                SubjectProfileData profile = SubjectProfileService.LoadProfile(_editingSubjectId, createIfMissing: false);
+                if (profile != null && !string.IsNullOrWhiteSpace(profile.lockedGameLanguage))
+                {
+                    return NormalizeLanguageCode(profile.lockedGameLanguage);
+                }
+            }
+
+            return NormalizeLanguageCode(PlayerPrefs.GetString("SelectedLanguage", "EN"));
+        }
+
+        string optionText = gameLanguageDropdown.options[gameLanguageDropdown.value].text;
+        string fromText = NormalizeLanguageCode(optionText, allowUnknown: true);
+        return string.IsNullOrEmpty(fromText)
+            ? LanguageIndexToCode(gameLanguageDropdown.value)
+            : fromText;
+    }
+
+    private void SetGameLanguageDropdown(string languageCode)
+    {
+        ResolveGameLanguageDropdown();
+        if (gameLanguageDropdown == null || gameLanguageDropdown.options.Count == 0)
+        {
+            return;
+        }
+
+        string normalizedCode = NormalizeLanguageCode(languageCode);
+        gameLanguageDropdown.SetValueWithoutNotify(LanguageCodeToIndex(normalizedCode));
+        gameLanguageDropdown.RefreshShownValue();
+    }
+
+    private static string LanguageIndexToCode(int index)
+    {
+        switch (index)
+        {
+            case 1: return "ZH_CN";
+            case 2: return "JP";
+            case 3: return "KR";
+            default: return "EN";
+        }
+    }
+
+    private static int LanguageCodeToIndex(string code)
+    {
+        switch (NormalizeLanguageCode(code))
+        {
+            case "ZH_CN": return 1;
+            case "JP": return 2;
+            case "KR": return 3;
+            default: return 0;
+        }
+    }
+
+    private static string NormalizeLanguageCode(string value, bool allowUnknown = false)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return allowUnknown ? string.Empty : "EN";
+        }
+
+        string normalized = value.Trim().ToUpperInvariant();
+        if (normalized == "ZH"
+            || normalized == "ZH-CN"
+            || normalized == "ZH_CN"
+            || normalized.Contains("CHINESE")
+            || value.Contains("中文")
+            || value.Contains("简体"))
+        {
+            return "ZH_CN";
+        }
+
+        if (normalized == "JA"
+            || normalized == "JA-JP"
+            || normalized == "JP"
+            || normalized.Contains("JAPANESE")
+            || value.Contains("日本"))
+        {
+            return "JP";
+        }
+
+        if (normalized == "KO"
+            || normalized == "KO-KR"
+            || normalized == "KR"
+            || normalized.Contains("KOREAN")
+            || value.Contains("한국"))
+        {
+            return "KR";
+        }
+
+        if (normalized == "EN" || normalized.Contains("ENGLISH") || value.Contains("英语") || value.Contains("英文"))
+        {
+            return "EN";
+        }
+
+        return allowUnknown ? string.Empty : "EN";
+    }
+
+    private static void ApplyLanguageImmediately(string languageCode)
+    {
+        string normalizedCode = NormalizeLanguageCode(languageCode);
+        PlayerPrefs.SetString("SelectedLanguage", normalizedCode);
+        PlayerPrefs.Save();
+
+        if (LocalizationManager.Instance != null)
+        {
+            LocalizationManager.Instance.ChangeLanguage(normalizedCode);
         }
     }
 
