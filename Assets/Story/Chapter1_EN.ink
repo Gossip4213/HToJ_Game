@@ -43,14 +43,14 @@ Leaving the drug where it is would respect that system, but she may not survive 
     The offer may be sincere, but the chemist would bear the risk if repayment never comes. And the potential new curing method for others would disappear.
     -> chapter1_hub
 
-* [Take the drug for Heinz's wife]
+* [Take the drug for his wife]
     #speaker: Ambrose
     I will take it. Her life is in immediate danger, and there is no other route likely to help her in time.
     #speaker: The Judge
     You give priority to an urgent human need over property rights and legal process.
     -> end_dilemma
 
-* [Leave the drug with the chemist]
+* [Leave the drug]
     #speaker: Ambrose
     I will not take it. The drug belongs to the chemist and would have more value, and I cannot make one person's need erase other people's rights and obligations.
     #speaker: The Judge

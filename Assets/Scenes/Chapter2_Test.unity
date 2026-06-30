@@ -1631,8 +1631,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 998, y: -119.99999}
-  m_SizeDelta: {x: 350, y: 240}
+  m_AnchoredPosition: {x: 1077, y: -163}
+  m_SizeDelta: {x: 401.81, y: 278.38}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &337790898
 MonoBehaviour:
@@ -4108,8 +4108,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
-  m_fontSizeBase: 40
+  m_fontSize: 35
+  m_fontSizeBase: 35
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -5687,8 +5687,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 574, y: -221}
-  m_SizeDelta: {x: 350, y: 240}
+  m_AnchoredPosition: {x: 725, y: -229.08}
+  m_SizeDelta: {x: 374.9355, y: 279.1952}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1131757005
 MonoBehaviour:
@@ -5992,8 +5992,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
-  m_fontSizeBase: 40
+  m_fontSize: 35
+  m_fontSizeBase: 35
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -7138,7 +7138,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1432540832
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9285,8 +9285,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
-  m_fontSizeBase: 40
+  m_fontSize: 35
+  m_fontSizeBase: 35
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -11221,8 +11221,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1476, y: -221}
-  m_SizeDelta: {x: 350, y: 240}
+  m_AnchoredPosition: {x: 1435, y: -228.67}
+  m_SizeDelta: {x: 363.4877, y: 278.38}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2025353048
 MonoBehaviour:
