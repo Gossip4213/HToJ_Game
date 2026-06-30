@@ -34,6 +34,7 @@ public class DialogueController : MonoBehaviour
     private float _choiceStartTime;
     private float _baseSpeakerFontSize;
     private float _baseBodyFontSize;
+    private InkCommandRouter _commandRouter;
 
     void Awake()
     {
@@ -46,6 +47,8 @@ public class DialogueController : MonoBehaviour
         {
             _baseBodyFontSize = txtBody.fontSize;
         }
+
+        _commandRouter = new InkCommandRouter(SetSpeaker);
     }
 
     void Start()
@@ -134,6 +137,14 @@ public class DialogueController : MonoBehaviour
         if (txtBody != null)
         {
             txtBody.font = globalFont;
+        }
+    }
+
+    private void SetSpeaker(string speakerName)
+    {
+        if (txtSpeaker != null)
+        {
+            txtSpeaker.text = speakerName;
         }
     }
 
@@ -411,80 +422,12 @@ public class DialogueController : MonoBehaviour
 
     private void ParseTags(List<string> tags)
     {
-        if (tags == null)
+        if (_commandRouter == null)
         {
-            return;
+            _commandRouter = new InkCommandRouter(SetSpeaker);
         }
 
-        foreach (string tag in tags)
-        {
-            int separatorIndex = tag.IndexOf(':');
-            if (separatorIndex < 0)
-            {
-                continue;
-            }
-
-            string tagKey = tag.Substring(0, separatorIndex).Trim();
-            string tagValue = tag.Substring(separatorIndex + 1).Trim();
-
-            if (tagKey == "speaker")
-            {
-                if (txtSpeaker != null)
-                {
-                    txtSpeaker.text = tagValue;
-                }
-            }
-            else if (tagKey == "load_scene")
-            {
-                Time.timeScale = 1f;
-                if (GameSystem.Instance != null)
-                {
-                    GameSystem.Instance.SaveGame(0);
-                }
-
-                UnityEngine.SceneManagement.SceneManager.LoadScene(tagValue);
-            }
-            else if (tagKey == "action")
-            {
-                if (tagValue == "upload_data")
-                {
-                    if (TelemetryManager.Instance != null)
-                    {
-                        TelemetryManager.Instance.UploadDataToServer();
-                    }
-                }
-                else if (tagValue.StartsWith("meta_"))
-                {
-                    string currentUser = PlayerPrefs.GetString("CurrentUser", "Guest");
-                    PlayerPrefs.SetInt($"{currentUser}_{tagValue}", 1);
-                    PlayerPrefs.Save();
-                }
-            }
-            else if (tagKey == "portrait" && ScenarioManager.Instance != null)
-            {
-                ScenarioManager.Instance.ChangePortrait(tagValue);
-            }
-            else if (tagKey == "show" && ScenarioManager.Instance != null)
-            {
-                ScenarioManager.Instance.ToggleProp(tagValue, true);
-            }
-            else if (tagKey == "hide" && ScenarioManager.Instance != null)
-            {
-                ScenarioManager.Instance.ToggleProp(tagValue, false);
-            }
-            else if (tagKey == "bg" && ScenarioManager.Instance != null)
-            {
-                ScenarioManager.Instance.ChangeBG(tagValue);
-            }
-            else if (tagKey == "bgm" && ScenarioManager.Instance != null)
-            {
-                ScenarioManager.Instance.ChangeBGM(tagValue);
-            }
-            else if (tagKey == "sfx" && ScenarioManager.Instance != null)
-            {
-                ScenarioManager.Instance.PlaySFX(tagValue);
-            }
-        }
+        _commandRouter.Execute(tags);
     }
 
     private IEnumerator SmoothTypeWriter(string text)
