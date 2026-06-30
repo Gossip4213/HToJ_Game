@@ -16,6 +16,8 @@ public class InteractableUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     private Color originalColor;
     private Vector3 originalScale;
     private DialogueController controller;
+    private bool pointerInside;
+    private bool hoverApplied;
 
     void Start()
     {
@@ -25,28 +27,94 @@ public class InteractableUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         controller = Object.FindFirstObjectByType<DialogueController>();
     }
 
+    void Update()
+    {
+        if (controller == null)
+        {
+            controller = Object.FindFirstObjectByType<DialogueController>();
+        }
+
+        if (!pointerInside)
+        {
+            return;
+        }
+
+        if (CanInteract())
+        {
+            ApplyHover();
+        }
+        else
+        {
+            ClearHover();
+        }
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
-        img.color = highlightColor;
-        transform.localScale = originalScale * hoverScale;
-        if (controller != null) controller.NotifyHoverUI(hoverThought);
+        pointerInside = true;
+        if (CanInteract())
+        {
+            ApplyHover();
+        }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        img.color = originalColor;
-        transform.localScale = originalScale;
-        if (controller != null) controller.NotifyExitUI();
+        pointerInside = false;
+        ClearHover();
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        Debug.Log($"【底层检测】鼠标按下了 {gameObject.name}");
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log($"【UI点击】点到了 {gameObject.name}，准备发送 ID: {objectID}");
-        if (controller != null) controller.SelectThisObject(objectID);
+        if (!CanInteract())
+        {
+            return;
+        }
+
+        controller.SelectThisObject(objectID);
+    }
+
+    private bool CanInteract()
+    {
+        return controller != null && controller.CanInteractWithSceneObjects;
+    }
+
+    private void ApplyHover()
+    {
+        if (hoverApplied || img == null)
+        {
+            return;
+        }
+
+        img.color = highlightColor;
+        transform.localScale = originalScale * hoverScale;
+        hoverApplied = true;
+        controller.NotifyHoverUI(hoverThought);
+    }
+
+    private void ClearHover()
+    {
+        if (img != null)
+        {
+            img.color = originalColor;
+        }
+        transform.localScale = originalScale;
+
+        if (hoverApplied && controller != null)
+        {
+            controller.NotifyExitUI();
+        }
+
+        hoverApplied = false;
+    }
+
+    void OnDisable()
+    {
+        pointerInside = false;
+        ClearHover();
     }
 }
