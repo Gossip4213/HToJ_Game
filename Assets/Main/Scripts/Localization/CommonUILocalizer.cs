@@ -5,23 +5,33 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Localizes common menu labels without requiring a localization component on
-/// every existing TextMeshPro object. Exact text matches are converted to a
+/// Localizes common interface labels without requiring a localization component
+/// on every existing TextMeshPro object. Exact text matches are converted to a
 /// canonical key, allowing language switching in either direction.
+///
+/// The periodic refresh is intentional: several existing panels are activated
+/// at runtime and some controllers write English labels after the scene-loaded
+/// callback. Refreshing at a low frequency keeps those late-created/overwritten
+/// labels synchronized without requiring new Inspector references.
 /// </summary>
 public sealed class CommonUILocalizer : MonoBehaviour
 {
     private static CommonUILocalizer _instance;
     private string _lastLanguage;
+    private float _nextRefreshTime;
+
+    private const float RefreshIntervalSeconds = 0.25f;
 
     private static readonly Dictionary<string, string[]> Entries =
         new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
         {
             // EN, ZH_CN, JP, KR
+            ["START"] = new[] { "Start", "开始", "スタート", "시작" },
+            ["EXIT"] = new[] { "Exit", "退出", "終了", "종료" },
             ["NEW_GAME"] = new[] { "New Game", "新游戏", "ニューゲーム", "새 게임" },
             ["CONTINUE"] = new[] { "Continue", "继续游戏", "続きから", "이어하기" },
             ["SETTINGS"] = new[] { "Settings", "设置", "設定", "설정" },
-            ["QUIT"] = new[] { "Quit", "退出", "終了", "종료" },
+            ["QUIT"] = new[] { "Quit", "退出游戏", "ゲーム終了", "게임 종료" },
             ["BACK"] = new[] { "Back", "返回", "戻る", "뒤로" },
             ["CANCEL"] = new[] { "Cancel", "取消", "キャンセル", "취소" },
             ["CONFIRM"] = new[] { "Confirm", "确认", "決定", "확인" },
@@ -43,8 +53,21 @@ public sealed class CommonUILocalizer : MonoBehaviour
             ["SAVE_CHANGES"] = new[] { "Save Changes", "保存修改", "変更を保存", "변경 사항 저장" },
             ["NATIVE_LANGUAGE"] = new[] { "Native Language", "母语", "母語", "모국어" },
             ["MULTILINGUAL"] = new[] { "Multilingual", "使用多种语言", "複数言語を使用", "다중 언어 사용" },
+            ["MULTILANGUAGE"] = new[] { "Multilanguage", "多语言", "多言語", "다국어" },
             ["OTHER_LANGUAGE"] = new[] { "Other Language", "其他语言", "その他の言語", "기타 언어" },
+            ["OTHER_LANGUAGES"] = new[] { "Other Languages", "其他语言", "その他の言語", "기타 언어" },
+            ["SELECT_OTHER_LANGUAGES"] = new[] { "Select other languages", "选择其他语言", "その他の言語を選択", "기타 언어 선택" },
+            ["WHICH_OTHER_LANGUAGES"] = new[] { "Which other languages do you speak?", "您还会使用哪些语言？", "ほかに使用できる言語はありますか？", "그 밖에 사용할 수 있는 언어가 있습니까?" },
+            ["PLEASE_SPECIFY"] = new[] { "Please specify", "请注明", "入力してください", "직접 입력" },
             ["GAME_LANGUAGE"] = new[] { "Game Language", "游戏语言", "ゲーム言語", "게임 언어" },
+            ["ENGLISH"] = new[] { "English", "英语", "英語", "영어" },
+            ["CHINESE"] = new[] { "Chinese", "中文", "中国語", "중국어" },
+            ["JAPANESE"] = new[] { "Japanese", "日语", "日本語", "일본어" },
+            ["KOREAN"] = new[] { "Korean", "韩语", "韓国語", "한국어" },
+            ["FRENCH"] = new[] { "French", "法语", "フランス語", "프랑스어" },
+            ["GERMAN"] = new[] { "German", "德语", "ドイツ語", "독일어" },
+            ["SPANISH"] = new[] { "Spanish", "西班牙语", "スペイン語", "스페인어" },
+            ["OTHER"] = new[] { "Other", "其他", "その他", "기타" },
             ["DONATE"] = new[] { "Donation", "支持作者", "支援", "후원" },
             ["THINKING"] = new[] { "Thinking", "思考中", "思考中", "생각 중" },
             ["SYSTEM"] = new[] { "System", "系统", "システム", "시스템" }
@@ -64,9 +87,34 @@ public sealed class CommonUILocalizer : MonoBehaviour
         SceneManager.sceneLoaded += _instance.OnSceneLoaded;
     }
 
+    public static void RefreshNow()
+    {
+        if (_instance != null)
+        {
+            _instance.ApplyCurrentLanguage();
+        }
+    }
+
+    public static string GetLocalizedText(string key)
+    {
+        if (!Entries.TryGetValue(key, out string[] values))
+        {
+            return key;
+        }
+
+        string language = Normalize(
+            PlayerPrefs.GetString("SelectedLanguage", "EN"));
+        return values[LanguageIndex(language)];
+    }
+
     private void Start()
     {
         ApplyCurrentLanguage();
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void Update()
@@ -74,9 +122,15 @@ public sealed class CommonUILocalizer : MonoBehaviour
         string language = Normalize(
             PlayerPrefs.GetString("SelectedLanguage", "EN"));
 
-        if (!string.Equals(language, _lastLanguage, StringComparison.Ordinal))
+        bool languageChanged = !string.Equals(
+            language,
+            _lastLanguage,
+            StringComparison.Ordinal);
+
+        if (languageChanged || Time.unscaledTime >= _nextRefreshTime)
         {
             Apply(language);
+            _nextRefreshTime = Time.unscaledTime + RefreshIntervalSeconds;
         }
     }
 
@@ -106,12 +160,56 @@ public sealed class CommonUILocalizer : MonoBehaviour
                 continue;
             }
 
-            string canonicalKey = FindCanonicalKey(label.text.Trim());
+            string trimmedText = label.text.Trim();
+            string canonicalKey = FindCanonicalKey(trimmedText);
             if (canonicalKey != null)
             {
                 label.text = Entries[canonicalKey][targetIndex];
+                continue;
+            }
+
+            if (TryLocalizeDynamicEditTitle(trimmedText, language, out string localizedTitle))
+            {
+                label.text = localizedTitle;
             }
         }
+    }
+
+    private static bool TryLocalizeDynamicEditTitle(
+        string text,
+        string language,
+        out string localizedText)
+    {
+        localizedText = null;
+
+        if (!text.StartsWith("Edit ", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        string subjectId = text.Substring("Edit ".Length).Trim();
+        if (string.IsNullOrWhiteSpace(subjectId))
+        {
+            return false;
+        }
+
+        switch (language)
+        {
+            case "ZH_CN":
+                localizedText = $"编辑 {subjectId}";
+                break;
+            case "JP":
+                localizedText = $"{subjectId} を編集";
+                break;
+            case "KR":
+                localizedText = $"{subjectId} 편집";
+                break;
+            default:
+                localizedText = $"Edit {subjectId}";
+                break;
+        }
+
+        return true;
     }
 
     private static string FindCanonicalKey(string text)
