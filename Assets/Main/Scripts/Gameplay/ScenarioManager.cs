@@ -50,9 +50,9 @@ public class ScenarioManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Automatically resolves an Ink speaker name to a sprite that follows the
-    /// character-name_test convention. Text after the first colon is treated as
-    /// a speaker subtitle, e.g. "The Judge: Third Deliberation" -> Judge_test.
+    /// Automatically resolves an Ink speaker name to a sprite. Unity may append
+    /// suffixes such as _0 to sliced sprites, so matching accepts a normalized
+    /// prefix in addition to an exact sprite-name match.
     /// </summary>
     public void ChangePortraitForSpeaker(string speakerName)
     {
@@ -90,7 +90,7 @@ public class ScenarioManager : MonoBehaviour
         {
             Debug.LogWarning(
                 $"[Portrait] No portrait found for speaker '{speakerName}'. " +
-                $"Expected one of: {string.Join(", ", candidates)}");
+                $"Expected a sprite matching one of: {string.Join(", ", candidates)}");
         }
     }
 
@@ -107,37 +107,44 @@ public class ScenarioManager : MonoBehaviour
                 candidates.Add("Judge_test");
                 candidates.Add("TheJudge_test");
                 candidates.Add("Sera_test");
+                candidates.Add("Sera");
                 break;
             case "sera":
                 candidates.Add("Sera_test");
+                candidates.Add("Sera");
                 candidates.Add("Judge_test");
                 break;
             case "ambrose":
             case "主角":
                 candidates.Add("Ambrose_test");
+                candidates.Add("Ambrose");
                 break;
             case "adams":
             case "亚当斯":
                 candidates.Add("Adams_test");
+                candidates.Add("Adams");
                 break;
             case "kate":
             case "凯特":
                 candidates.Add("Kate_test");
+                candidates.Add("Kate");
                 break;
             case "miniel":
             case "明伊尔":
                 candidates.Add("Miniel_test");
+                candidates.Add("Miniel");
                 break;
             case "rumins":
             case "陆明斯":
                 candidates.Add("Rumins_test");
+                candidates.Add("Rumins");
                 break;
             default:
                 candidates.Add(speakerName + "_test");
+                candidates.Add(speakerName);
                 break;
         }
 
-        candidates.Add(speakerName);
         return candidates;
     }
 
@@ -151,7 +158,14 @@ public class ScenarioManager : MonoBehaviour
         string normalizedTarget = NormalizeAssetName(portraitName);
         foreach (Sprite sprite in portraitSprites)
         {
-            if (sprite != null && NormalizeAssetName(sprite.name) == normalizedTarget)
+            if (sprite == null)
+            {
+                continue;
+            }
+
+            string normalizedSpriteName = NormalizeAssetName(sprite.name);
+            if (normalizedSpriteName == normalizedTarget
+                || normalizedSpriteName.StartsWith(normalizedTarget))
             {
                 return sprite;
             }
