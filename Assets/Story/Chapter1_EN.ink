@@ -1,3 +1,5 @@
+INCLUDE Chapter2_EN.ink
+
 -> chapter1_intro
 
 === chapter1_intro ===
@@ -92,7 +94,6 @@ The result protects you from choosing a principle, but not from the consequence 
 
 === end_dilemma ===
 #speaker: The Judge
-The decision is recorded.
+The second decision is recorded. The next case follows.
 
-#load_scene: Test_ending
--> END
+-> robin_hood_intro
