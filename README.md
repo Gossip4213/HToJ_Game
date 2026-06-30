@@ -1,80 +1,231 @@
-# Heads, Tails, or Justice? (HToJ): Gamified Data Collection Platform in Ethical Dilemmas
+# Heads, Tails, or Justice? / 掷问天意
 
-![Unity](https://img.shields.io/badge/Unity-2022_LTS-black?style=flat&logo=unity)
-![Language](https://img.shields.io/badge/Language-C%23-blue?style=flat&logo=csharp)
-![Narrative](https://img.shields.io/badge/Engine-Ink-ff69b4?style=flat)
-![Status](https://img.shields.io/badge/Status-In_Development-orange?style=flat)
+![Unity](https://img.shields.io/badge/Unity-6000.0.62f1-black?style=flat&logo=unity)
+![Language](https://img.shields.io/badge/Code-C%23-blue?style=flat&logo=csharp)
+![Narrative](https://img.shields.io/badge/Narrative-Ink-ff69b4?style=flat)
+![Localization](https://img.shields.io/badge/Localization-EN%20%7C%20ZH--CN%20%7C%20JA%20%7C%20KO-6f42c1?style=flat)
+![Build](https://img.shields.io/badge/Tool_Build-v0.1.0-success?style=flat)
 
-> A scalable, hybrid-architecture Visual Novel framework developed in Unity.
-> Designed to explore the intersection of **interactive narrative**, **moral decision-making**, and **behavioral data collection**.
+> A multilingual interactive moral-decision visual novel and behavioral-data collection framework.
+>
+> 一款结合视觉小说叙事、道德困境决策与行为数据记录的多语言实验工具原型。
 
 <div align="center">
-<img width="100%" alt="Main-UI showcase" src="https://github.com/user-attachments/assets/ca116a02-48c3-4a98-a17b-b1a0096656c6" />
+  <img width="100%" alt="HToJ main menu artwork" src="Assets/Main/Art/Pic/RS_Main_menu.png" />
 </div>
 
-## 📖 Introduction
+## Overview
 
-**HToJ** is a research-oriented development project. While presented as a fantasy visual novel, its underlying architecture is engineered as a **psychological experimental platform**.
+**Heads, Tails, or Justice? (HToJ)** is a solo-developed Unity project exploring how people make choices under moral uncertainty.
 
-The project adopts a **Hybrid Narrative Architecture**, combining the **Ink** language for fluid branching storytelling with Unity's native **ScriptableObjects** for handling complex, high-stakes moral decision events ("Cases"). This allows for decoupled tracking of narrative flow and quantitative behavioral metrics.
+The current **Tool Build** is a packaged vertical slice designed for internal demonstration, pilot testing and future experimental adaptation. It combines:
 
-## 🛠️ Technical Features
+- branching narrative written in **Ink**;
+- Unity-based dialogue, portraits and investigation interactions;
+- profile-isolated save data and telemetry sessions;
+- multilingual presentation in English, Simplified Chinese, Japanese and Korean.
 
-### 1. The "Hybrid" Narrative Engine
-* **Ink Integration**: Utilizes the **Ink** language (by Inkle Studios) to manage the linear narrative flow, branching dialogue, and variable tracking. This separates story content from game logic, preventing "spaghetti code."
-* **Case System (ScriptableObjects)**: Complex moral dilemmas are encapsulated as Unity `ScriptableObjects`. Ink triggers these "Cases" via Tags, handing control over to a specialized UI for weighing evidence and making judgments.
+This repository also supports a separate long-form story direction. The experimental/tool build and the full narrative work are intentionally kept as distinct development tracks.
 
-### 2. Scalable Systems
-* **Custom Localization (L10N)**: A lightweight, JSON-based localization system. Supports dynamic language switching (ZH/EN/JP) at runtime without scene reloading, utilizing C# Actions/Delegates for observer-pattern UI updates.
-* **Robust Persistence**: A custom `System.IO` based save/load system. Serializes complex game states—including Ink variables, chapter progress, and decision history—into local JSON files.
+## Current Playable Flow
 
-### 3. AI-Assisted Asset Pipeline
-This project leverages generative AI to optimize the solo-developer workflow:
-* **Visual Arts**: **Stable Diffusion** for character design and environment conceptualization.
-* **Voice Acting**: **VVC (Voice Changer)** technology to generate character voices.
+```text
+MainMenu
+   ↓
+Prologue
+   ↓
+Chapter0_Test — Trolley dilemma
+   ↓
+Chapter1_Test — Heinz dilemma
+   ↓
+Chapter2_Test — Robin Hood dilemma
+   ↓
+Test_ending
+   ↓
+MainMenu
+```
 
-## 💻 Tech 
+Each dilemma includes inspectable scene elements, direct moral choices and an optional coin-based procedure. The coin does not remove responsibility: accepting, rejecting or delegating to it is itself recorded as part of the decision process.
 
-| Category | Technology | Usage |
-| :--- | :--- | :--- |
-| **Engine** | Unity 2022 LTS | Core Framework |
-| **Language** | C# (.NET Standard 2.1) | Game Logic, Custom Systems |
-| **Narrative** | **Ink** & Ink-Unity Integration | Dialogue Flow & Logic |
-| **Data** | JSON / ScriptableObject | Localization, Save Data, Game Config |
-| **UI** | UGUI & TextMeshPro | Interface & Layout |
+## Tool Build Features
 
-## 📸 Showcase
+### Narrative and interaction
 
-### Main Menu
-<img width="100%" alt="Main-UI showcase" src="https://github.com/user-attachments/assets/ec4e1086-2988-416e-b532-c167c426bd5d" />
-A fantasy-themed, anime UI designed to set an immersive tone for the visual novel and the data-collection framework.
+- Ink-driven dialogue, choices and scene transitions.
+- Centralized Ink command routing for speakers, scenes, portraits, audio, props and telemetry actions.
+- Speaker-driven portrait switching.
+- Typewriter presentation with configurable text speed.
+- Investigation objects only become interactive while matching `#id:` choices are active.
+- Hover and click behavior is disabled during ordinary narration and typewriter animation.
 
-### Settings Interface
-<img width="100%" alt="settings-UI showcase" src="https://github.com/user-attachments/assets/687005ce-58a4-4c8e-b162-a698cc5e48bd" />
-Allows adjustment of resolution, audio, and text speed to accommodate participant preferences.
+### Participant profiles and persistence
 
-### Save&Load  
-<img width="100%" alt="S L-UI showcase" src="https://github.com/user-attachments/assets/049b01ae-5734-4e5e-942e-126928b2d994" />
-A visualized save&load system for local data and game progress.
+- Multiple subject profiles.
+- Save slots isolated by subject.
+- Profile-specific language settings.
+- Session-specific telemetry files.
+- Anonymous installation identifier instead of a physical-device identifier.
+- Save schema and game-version metadata.
+- Temporary-file writes for safer save replacement.
 
-## 👤 Author
+### Localization
 
-**Xinbo Gao**
-(Gossip4213)
-* MScR Neuroscience Student @ University of Edinburgh
+The playable vertical slice supports:
 
-* Focus: Computational Neuroscience, Neural Dynamics, Decision-making, Moral decision, multi-languages cognition.
+| Code | Language |
+|---|---|
+| `EN` | English |
+| `ZH_CN` | Simplified Chinese |
+| `JP` | Japanese |
+| `KR` | Korean |
 
-## 📂 Project Structure
+Localized content includes:
+
+- Prologue, all three dilemma chapters and the test ending;
+- main menu, settings and save/load labels;
+- calibration and multilingual-profile interfaces;
+- localized speaker display names;
+- CJK TextMeshPro font assets with dynamic multi-atlas support.
+
+Machine-facing Ink tags remain in English across every language version:
+
+```ink
+#speaker: The Judge
+#id:SilverCoin
+#action: upload_data
+#load_scene: Chapter0_Test
+#bgm: Dilemma
+```
+
+`LocalizedInkTagValidator` checks these tags before building and reports the exact file and line if a localized machine tag is unsafe.
+
+### Behavioral data pipeline
+
+The tool is structured to record subject-separated session and interaction data for later analysis. Current data handling includes:
+
+- subject/profile metadata;
+- session identifiers and timestamps;
+- narrative and interaction events;
+- decision outcomes and supported meta flags;
+- explicit upload actions.
+
+Before formal participant deployment, consent wording, privacy documentation, server configuration and study-specific ethics requirements should be reviewed independently.
+
+## Architecture
+
+```text
+Ink source files
+      │
+      ▼
+DialogueController ── InkCommandRouter
+      │                     │
+      ├── dialogue/UI       ├── speaker & portrait commands
+      ├── choices           ├── scene and audio commands
+      └── investigation     └── telemetry/meta commands
+      │
+      ▼
+GameSystem / SubjectProfileService / TelemetryManager
+      │
+      ├── profile-isolated saves
+      └── per-session behavioral records
+```
+
+## Showcase
+
+### Main menu
+
+<img width="100%" alt="Main menu interface" src="https://github.com/user-attachments/assets/ec4e1086-2988-416e-b532-c167c426bd5d" />
+
+### Settings
+
+<img width="100%" alt="Settings interface" src="https://github.com/user-attachments/assets/687005ce-58a4-4c8e-b162-a698cc5e48bd" />
+
+### Save and load
+
+<img width="100%" alt="Save and load interface" src="https://github.com/user-attachments/assets/049b01ae-5734-4e5e-942e-126928b2d994" />
+
+### Current protagonist portrait asset
+
+<div align="center">
+  <img width="42%" alt="Ambrose portrait" src="Assets/Main/Art/Characters/Ambrose/Ambrose_test.png" />
+</div>
+
+## Opening the Project
+
+### Requirements
+
+- Unity `6000.0.62f1`
+- Ink Unity Integration included by the project
+- Windows is the currently prepared standalone build target
+
+### Run in the Editor
+
+1. Clone or download the repository.
+2. Open the project using Unity `6000.0.62f1`.
+3. Allow Unity and Ink to finish importing and compiling assets.
+4. Open `Assets/Scenes/MainMenu.unity`.
+5. Enter Play Mode.
+
+### Localization validation
+
+Before creating a release build, run:
+
+```text
+Tools > HToJ > Validate Localized Ink Tags
+```
+
+Expected Console result:
+
+```text
+[Localization] All localized Ink machine tags are ASCII-safe.
+```
+
+### Build
+
+Use the prepared Windows build profile and confirm that the following scenes are enabled:
+
+```text
+MainMenu
+Prologue
+Chapter0_Test
+Chapter1_Test
+Chapter2_Test
+Test_ending
+```
+
+The packaged tool product name is `HToJ_Tool`, version `0.1.0`.
+
+## Project Structure
 
 ```text
 Assets/
+├── Editor/
+│   └── LocalizedInkTagValidator.cs
 ├── Main/
-│   ├── Scripts/
-│   │   ├── Core/           # GameSystem (Singleton), LocalizationManager
-│   │   ├── Gameplay/       # DialogueController (Ink Bridge), ChoiceManager
-│   │   ├── UI/             # LocalizeUI, Menus
-│   │   └── Data/           # PlayerProfile, JSON Data Structures
-│   ├── Story/              # .ink files and compiled JSON assets
-│   └── Resources/          # ScriptableObjects (Cases) & Audio
-└── StreamingAssets/        # localization.json (Hot-swappable text)
+│   ├── Art/
+│   │   ├── Characters/
+│   │   ├── Fonts/
+│   │   └── Pic/
+│   └── Scripts/
+│       ├── Gameplay/
+│       ├── Localization/
+│       └── MainmenuUI/
+├── Resources/
+│   └── Story/               # ZH / JP / KR Ink and compiled JSON
+├── Scenes/
+└── Story/                   # English Ink source and compiled JSON
+```
+
+## Development Status
+
+The current tool build has been successfully packaged locally. Its feature set is now considered **frozen**: future changes to this track should focus on confirmed bugs, deployment requirements and study-specific adaptations.
+
+The long-form story version of **掷问天意** remains a separate creative track, with a broader cast, seven shared moral-deliberation chapters and a stronger emphasis on the work's philosophical narrative.
+
+## Author
+
+**Xinbo Gao / Gossip4213**
+
+MScR Neuroscience student at the University of Edinburgh.
+
+Interests include computational neuroscience, neural dynamics, decision-making, moral cognition and multilingual cognition.

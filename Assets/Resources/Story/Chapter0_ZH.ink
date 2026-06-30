@@ -1,0 +1,85 @@
+-> trolley_hub
+
+=== trolley_hub ===
+#speaker: The Judge
+#bgm: Dilemma
+安布罗斯，看看下方的铁轨。
+一辆失控的电车正驶向主轨上的五名工人。他们已经来不及离开。
+你身旁有一根拉杆，可以让电车转入支轨；支轨上站着另一名工人。
+电车无法停下。拉动拉杆会改变它的方向；什么也不做，则会维持原来的路线。
+你认为该怎么做？
+
++ #id:Lever [查看拉杆]
+    #speaker: Ambrose
+    机械结构很简单：只需一个动作，就会改变由谁承担危险。
+    拉动它，意味着我主动改变路线；不拉，则是任由既有进程继续。
+    -> trolley_hub
+
++ #id:TheFive [查看五名工人]
+    #speaker: Ambrose
+    五个人被困在主轨上。就眼前而言，他们每个人求生的权利，都与支轨上的那个人同样重要。
+    -> trolley_hub
+
++ #id:TheOne [查看支轨上的工人]
+    #speaker: Ambrose
+    一个人站在支轨上，目前并不在电车的行进路线上。
+    若让电车转向，我便是为了救下五人，而把危险加诸于他。
+    -> trolley_hub
+
++ #id:SilverCoin [查看硬币]
+    #speaker: Ambrose
+    看起来只是一枚再普通不过的硬币。
+    -> trolley_hub
+
+* [拉动拉杆，让电车转向]
+    #speaker: Ambrose
+    我会改变它的方向。这样会有一人死亡，但若维持现状，死去的将是五人。
+    #speaker: The Judge
+    你以主动介入换取更少的死亡，也让那名工人的死成为你行动的结果。
+    -> end_dilemma
+
+* [不拉拉杆]
+    #speaker: Ambrose
+    我不会改变路线。五人仍处于危险之中，但我也不会亲手把支轨上的人置于电车前方。
+    #speaker: The Judge
+    你维持了既有进程，没有把一人当作拯救他人的手段，却也允许五场本可避免的死亡发生。
+    -> end_dilemma
+
+* [掷硬币决定]
+    #speaker: Ambrose
+    正面：拉动拉杆。反面：什么也不做。
+    #speaker: The Judge
+    这个程序不偏袒任何一方，但选择采用它，本身仍是一个道德决定。
+    -> coin_result
+
+=== coin_result ===
+#speaker: Ambrose
+（硬币在空中翻转，最后撞上金属外壳，停了下来。）
+反面。按照我先前定下的规则，我应该不拉拉杆。
+
+#speaker: The Judge
+结果并不能强迫你。它只是把决定以一种你曾同意遵守的形式交还给你。
+
+* [遵守结果，不拉拉杆]
+    #speaker: Ambrose
+    在知道结果之前，我就选择了这个程序。我会遵守它，即使这意味着五个人会死。
+    #speaker: The Judge
+    我明白了。
+    -> end_dilemma
+
+* [拒绝结果，拉动拉杆]
+    #speaker: Ambrose
+    我用偶然来避免偏袒任何一方，但我无法接受这个结果。我会拉动拉杆。
+    #speaker: The Judge
+    我明白了。
+    -> end_dilemma
+
+=== end_dilemma ===
+#speaker: The Judge
+决定已经作出。
+
+#speaker: Ambrose
+（车轮与金属摩擦的声音骤然重新涌来。）
+
+#load_scene: Chapter1_Test
+-> END

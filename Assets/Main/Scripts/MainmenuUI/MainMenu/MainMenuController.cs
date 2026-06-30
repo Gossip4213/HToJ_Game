@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -9,13 +9,13 @@ public class MainMenuController : MonoBehaviour
     [Header("Panels")]
     public GameObject panelMenu;
     public GameObject panelSettings;
-    public GameObject panelCalibration; 
+    public GameObject panelCalibration;
 
     [Header("UI Elements")]
     public Button btnContinue;
     public TMP_Dropdown langDropdown;
     public TMP_Dropdown resDropdown;
-    public TMP_Dropdown profileDropdown; 
+    public TMP_Dropdown profileDropdown;
     public Toggle windowedToggle;
     public Toggle skipUnreadToggle;
     public Slider musicSlider;
@@ -27,27 +27,31 @@ public class MainMenuController : MonoBehaviour
 
     [Header("Managers")]
     public SaveLoadMenuController saveLoadMenu;
+    public CalibrationUIController calibrationController;
 
-    private Resolution[] resolutions;
     public static System.Action<float> OnFontSizeChanged;
+
     private Coroutine _typingCoroutine;
-    private string _previewContent = "Hmm... is it heads or tails this time? I am not sure....";
+    private readonly string _previewContent = "Hmm... is it heads or tails this time? I am not sure....";
 
     void Start()
     {
+        SubjectProfileService.EnsureLegacyProfiles();
         InitSettingsUI();
-        InitProfileSystem(); 
+        InitProfileSystem();
 
         if (langDropdown != null)
         {
+            langDropdown.onValueChanged.RemoveListener(OnLanguageChanged);
             langDropdown.onValueChanged.AddListener(OnLanguageChanged);
         }
+
+        SettingsService.ApplyRuntimeSettings();
         CheckContinueButton();
     }
 
-    void InitProfileSystem()
+    private void InitProfileSystem()
     {
-        ShowMenu();
         RefreshProfileDropdown();
 
         if (profileDropdown != null)
@@ -55,68 +59,166 @@ public class MainMenuController : MonoBehaviour
             profileDropdown.onValueChanged.RemoveAllListeners();
             profileDropdown.onValueChanged.AddListener(OnProfileDropdownChanged);
         }
+
+        if (!SubjectProfileService.HasAnyActiveProfile())
+        {
+            ShowCalibrationPanel(false, true);
+            return;
+        }
+
+        ShowMenu();
+        SyncRuntimeToCurrentProfile(false);
     }
 
-    void RefreshProfileDropdown()
+    private void RefreshProfileDropdown()
     {
-        if (profileDropdown == null) return;
+        if (profileDropdown == null)
+        {
+            return;
+        }
 
-        string allProfiles = PlayerPrefs.GetString("AllProfiles", "");
-        string[] profiles = allProfiles.Split(new char[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries);
-
+        List<string> profiles = SubjectProfileService.GetActiveProfileIds();
         profileDropdown.ClearOptions();
-        List<string> options = new List<string>(profiles);
-        profileDropdown.AddOptions(options);
+        profileDropdown.AddOptions(profiles);
 
-        string current = PlayerPrefs.GetString("CurrentUser", "");
-        int currentIndex = options.IndexOf(current);
+        string currentProfile = SubjectProfileService.GetCurrentProfileId();
+        int currentIndex = profiles.IndexOf(currentProfile);
         if (currentIndex >= 0)
         {
-            profileDropdown.value = currentIndex;
+            profileDropdown.SetValueWithoutNotify(currentIndex);
         }
+
         profileDropdown.RefreshShownValue();
     }
 
     public void OnProfileDropdownChanged(int index)
     {
-        if (profileDropdown == null) return;
+        if (profileDropdown == null || index < 0 || index >= profileDropdown.options.Count)
+        {
+            return;
+        }
+
         string selectedProfile = profileDropdown.options[index].text;
+        if (!SubjectProfileService.SetCurrentProfile(selectedProfile))
+        {
+            Debug.LogError($"[SubjectProfile] Could not switch to {selectedProfile}.");
+            return;
+        }
 
-        PlayerPrefs.SetString("CurrentUser", selectedProfile);
-        PlayerPrefs.Save();
-
-        Debug.Log($"【系统】已将观测对象切换至：{selectedProfile}");
-        CheckContinueButton(); 
+        SyncRuntimeToCurrentProfile(true);
+        CheckContinueButton();
+        Debug.Log($"[SubjectProfile] Current subject: {selectedProfile}");
     }
+
+    private void SyncRuntimeToCurrentProfile(bool logSwitch)
+    {
+        string currentProfileId = SubjectProfileService.GetCurrentProfileId();
+        SubjectProfileData profile = SubjectProfileService.LoadProfile(currentProfileId, true);
+        if (profile == null)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(profile.lockedGameLanguage))
+        {
+            ApplyLanguage(profile.lockedGameLanguage, syncDropdown: true);
+        }
+
+        if (GameSystem.Instance != null)
+        {
+            GameSystem.Instance.BeginNewGame();
+        }
+
+        if (TelemetryManager.Instance != null)
+        {
+            TelemetryManager.Instance.RefreshForCurrentProfile();
+            TelemetryManager.Instance.UpdateSubjectProfile(profile);
+            if (logSwitch)
+            {
+                TelemetryManager.Instance.LogEvent("profile_switched", currentProfileId);
+            }
+        }
+    }
+
     public void OnBtnShowCalibrationClick()
     {
-        ShowCalibrationPanel();
+        ShowCalibrationPanel(false, false);
     }
 
-    void ShowCalibrationPanel()
+    public void OnBtnEditCurrentProfileClick()
+    {
+        if (!SubjectProfileService.HasAnyActiveProfile())
+        {
+            ShowCalibrationPanel(false, true);
+            return;
+        }
+
+        ShowCalibrationPanel(true, false);
+    }
+
+    private void ShowCalibrationPanel(bool editExisting, bool profileCreationRequired)
     {
         if (panelMenu != null) panelMenu.SetActive(false);
         if (panelSettings != null) panelSettings.SetActive(false);
         if (panelCalibration != null) panelCalibration.SetActive(true);
+
+        CalibrationUIController controller = GetCalibrationController();
+        if (controller == null)
+        {
+            Debug.LogError("[SubjectProfile] CalibrationUIController is not assigned or present in the calibration panel.");
+            return;
+        }
+
+        if (editExisting)
+        {
+            controller.OpenEditMode(SubjectProfileService.GetCurrentProfileId());
+        }
+        else
+        {
+            controller.OpenCreateMode(profileCreationRequired);
+        }
+    }
+
+    private CalibrationUIController GetCalibrationController()
+    {
+        if (calibrationController != null)
+        {
+            return calibrationController;
+        }
+
+        if (panelCalibration != null)
+        {
+            calibrationController = panelCalibration.GetComponentInChildren<CalibrationUIController>(true);
+        }
+
+        return calibrationController;
+    }
+
+    public void OnSubjectProfileSaved(string subjectId)
+    {
+        SubjectProfileService.SetCurrentProfile(subjectId);
+        RefreshProfileDropdown();
+        SyncRuntimeToCurrentProfile(false);
+        ShowMenu();
+        CheckContinueButton();
     }
 
     public void OnBtnStartClick()
     {
-        Debug.Log("Start New Game request...");
-        if (GameSystem.Instance != null) GameSystem.Instance.isLoadingFromSave = false;
-
-        string currentProfile = PlayerPrefs.GetString("CurrentUser", "");
-
-        if (string.IsNullOrEmpty(currentProfile))
+        string currentProfile = SubjectProfileService.GetCurrentProfileId();
+        if (string.IsNullOrWhiteSpace(currentProfile))
         {
-            Debug.Log("无档案，拦截 Start ...");
-            ShowCalibrationPanel();
+            ShowCalibrationPanel(false, true);
+            return;
         }
-        else
+
+        if (GameSystem.Instance != null)
         {
-            Debug.Log($" {currentProfile} welcome...");
-            UnityEngine.SceneManagement.SceneManager.LoadScene("Prologue");
+            GameSystem.Instance.BeginNewGame();
         }
+
+        Debug.Log($"[System] Starting a new game for {currentProfile}.");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Prologue");
     }
 
     public void ShowMenu()
@@ -126,25 +228,33 @@ public class MainMenuController : MonoBehaviour
         if (panelCalibration != null) panelCalibration.SetActive(false);
     }
 
-    void CheckContinueButton()
+    private void CheckContinueButton()
     {
-        bool hasSave = false;
-        if (GameSystem.Instance != null)
+        bool hasSave = GameSystem.Instance != null && GameSystem.Instance.HasAnySaveFile();
+        if (btnContinue == null)
         {
-            hasSave = GameSystem.Instance.HasAnySaveFile();
+            return;
         }
+
         btnContinue.interactable = hasSave;
-        var text = btnContinue.GetComponentInChildren<TextMeshProUGUI>();
-        if (text != null) text.alpha = hasSave ? 1f : 0.5f;
+        TextMeshProUGUI text = btnContinue.GetComponentInChildren<TextMeshProUGUI>();
+        if (text != null)
+        {
+            text.alpha = hasSave ? 1f : 0.5f;
+        }
     }
 
     public void OnBtnContinueClick()
     {
-        if (saveLoadMenu != null) saveLoadMenu.ShowMenu(false);
+        if (saveLoadMenu != null)
+        {
+            saveLoadMenu.ShowMenu(false);
+        }
     }
 
     public void OnBtnSettingsClick()
     {
+        RefreshSettingsControls();
         if (panelMenu != null) panelMenu.SetActive(false);
         if (panelSettings != null) panelSettings.SetActive(true);
         if (panelCalibration != null) panelCalibration.SetActive(false);
@@ -157,7 +267,9 @@ public class MainMenuController : MonoBehaviour
 
     public void OnBtnQuitClick()
     {
-        Debug.Log("exiting.....");
+        PlayerPrefs.Save();
+        Debug.Log("Exiting...");
+
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -165,63 +277,55 @@ public class MainMenuController : MonoBehaviour
 #endif
     }
 
-
-    void InitSettingsUI()
+    private void InitSettingsUI()
     {
-        Vector2Int[] targetRes = new Vector2Int[]
-        {
-            new Vector2Int(3840, 2160),
-            new Vector2Int(2560, 1440),
-            new Vector2Int(1920, 1080),
-            new Vector2Int(1600, 900),
-            new Vector2Int(1280, 720)
-        };
-
         if (resDropdown != null)
         {
             resDropdown.ClearOptions();
             List<string> options = new List<string>();
-            int currentResIndex = 2;
-            List<Resolution> customResList = new List<Resolution>();
-
-            for (int i = 0; i < targetRes.Length; i++)
+            foreach (Vector2Int resolution in SettingsService.SupportedResolutions)
             {
-                options.Add(targetRes[i].x + " x " + targetRes[i].y);
-                Resolution r = new Resolution();
-                r.width = targetRes[i].x;
-                r.height = targetRes[i].y;
-                customResList.Add(r);
-                if (Screen.width == targetRes[i].x && Screen.height == targetRes[i].y)
-                {
-                    currentResIndex = i;
-                }
+                options.Add(resolution.x + " x " + resolution.y);
             }
-            resolutions = customResList.ToArray();
+
             resDropdown.AddOptions(options);
-            resDropdown.value = currentResIndex;
+        }
+
+        RefreshSettingsControls();
+        SyncLanguageDropdown(PlayerPrefs.GetString("SelectedLanguage", "EN"));
+    }
+
+    private void RefreshSettingsControls()
+    {
+        if (resDropdown != null)
+        {
+            resDropdown.SetValueWithoutNotify(SettingsService.FindCurrentResolutionIndex());
             resDropdown.RefreshShownValue();
         }
 
-        if (windowedToggle != null) windowedToggle.isOn = !Screen.fullScreen;
-        if (musicSlider != null)
+        if (windowedToggle != null)
         {
-            float savedVol = PlayerPrefs.GetFloat("MusicVol", 0.75f);
-            musicSlider.value = savedVol;
-            if (GameSystem.Instance != null)
-            {
-                GameSystem.Instance.SetMusicVolume(savedVol);
-            }
+            windowedToggle.SetIsOnWithoutNotify(!Screen.fullScreen);
         }
 
-        if (sfxSlider != null) sfxSlider.value = PlayerPrefs.GetFloat("SFXVol", 0.75f);
+        if (musicSlider != null)
+        {
+            musicSlider.SetValueWithoutNotify(SettingsService.MusicVolume);
+        }
+
+        if (sfxSlider != null)
+        {
+            sfxSlider.SetValueWithoutNotify(SettingsService.SfxVolume);
+        }
+
         if (textSpeedSlider != null)
         {
-            int savedLevel = PlayerPrefs.GetInt("TextSpeedLevel", 1);
-            textSpeedSlider.value = savedLevel;
+            textSpeedSlider.SetValueWithoutNotify(SettingsService.TextSpeedLevel);
         }
+
         if (skipUnreadToggle != null)
         {
-            skipUnreadToggle.isOn = PlayerPrefs.GetInt("SkipUnread", 0) == 1;
+            skipUnreadToggle.SetIsOnWithoutNotify(SettingsService.SkipUnread);
         }
 
         if (fontSizeSlider != null)
@@ -229,151 +333,215 @@ public class MainMenuController : MonoBehaviour
             fontSizeSlider.minValue = 0;
             fontSizeSlider.maxValue = 2;
             fontSizeSlider.wholeNumbers = true;
-            fontSizeSlider.value = PlayerPrefs.GetInt("FontSizeLevel", 1);
+            fontSizeSlider.SetValueWithoutNotify(SettingsService.FontSizeLevel);
         }
+
+        UpdateFontPreview(SettingsService.FontScale);
     }
 
     public void SetResolution(int index)
     {
-        if (resolutions == null || index < 0 || index >= resolutions.Length) return;
-        Resolution res = resolutions[index];
-        Screen.SetResolution(res.width, res.height, Screen.fullScreen);
+        SettingsService.SetResolution(index);
     }
 
     public void SetWindowed(bool isWindowed)
     {
-        Screen.fullScreenMode = isWindowed ? FullScreenMode.Windowed : FullScreenMode.FullScreenWindow;
-        Debug.Log(isWindowed ? "Windowed" : "Full screen");
+        SettingsService.SetWindowed(isWindowed);
     }
 
-    public void SetMusicVolume(float val)
+    public void SetMusicVolume(float value)
     {
-        PlayerPrefs.SetFloat("MusicVol", val);
-        if (GameSystem.Instance != null)
+        SettingsService.SetMusicVolume(value);
+    }
+
+    public void SetSFXVolume(float value)
+    {
+        SettingsService.SetSfxVolume(value);
+    }
+
+    public void SetTextSpeed(float value)
+    {
+        float delay = SettingsService.SetTextSpeedLevel(value);
+        StartSpeedPreview(delay);
+    }
+
+    private void StartSpeedPreview(float delay)
+    {
+        if (speedPreviewText == null)
         {
-            GameSystem.Instance.SetMusicVolume(val);
-        }
-    }
-
-    public void SetSFXVolume(float val)
-    {
-        PlayerPrefs.SetFloat("SFXVol", val);
-        if (GameSystem.Instance != null) GameSystem.Instance.SetSFXVolume(val);
-    }
-
-    public void SetTextSpeed(float val)
-    {
-        int level = Mathf.RoundToInt(val);
-        float charDelay = 0.05f;
-
-        switch (level)
-        {
-            case 0:
-                charDelay = 0.1f;
-                break;
-            case 1:
-                charDelay = 0.05f;
-                break;
-            case 2:
-                charDelay = 0.02f;
-                break;
+            return;
         }
 
-        PlayerPrefs.SetInt("TextSpeedLevel", level);
-
-        if (speedPreviewText != null)
+        if (_typingCoroutine != null)
         {
-            if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
-            _typingCoroutine = StartCoroutine(RunTypewriterEffect(charDelay));
+            StopCoroutine(_typingCoroutine);
         }
+
+        _typingCoroutine = StartCoroutine(RunTypewriterEffect(delay));
     }
 
-    IEnumerator RunTypewriterEffect(float delay)
+    private IEnumerator RunTypewriterEffect(float delay)
     {
-        speedPreviewText.text = "";
+        speedPreviewText.text = string.Empty;
         while (true)
         {
-            foreach (char c in _previewContent)
+            foreach (char character in _previewContent)
             {
-                speedPreviewText.text += c;
-                yield return new WaitForSeconds(delay);
+                speedPreviewText.text += character;
+                yield return new WaitForSecondsRealtime(delay);
             }
 
-            yield return new WaitForSeconds(1.0f);
-            speedPreviewText.text = "";
+            yield return new WaitForSecondsRealtime(1f);
+            speedPreviewText.text = string.Empty;
         }
     }
 
     public void SetSkipUnread(bool isOn)
     {
-        PlayerPrefs.SetInt("SkipUnread", isOn ? 1 : 0);
-        Debug.Log("SkipUnread: " + isOn);
+        SettingsService.SetSkipUnread(isOn);
     }
 
-    public void SetFontSize(float val)
+    public void SetFontSize(float value)
     {
-        int level = Mathf.RoundToInt(val);
-        PlayerPrefs.SetInt("FontSizeLevel", level);
+        float scale = SettingsService.SetFontSizeLevel(value);
+        UpdateFontPreview(scale);
+        OnFontSizeChanged?.Invoke(scale);
+    }
 
-        float scaleFactor = 1.0f;
-        float previewSize = 45f;
-
-        switch (level)
-        {
-            case 0:
-                scaleFactor = 0.9f;
-                previewSize = 40f;
-                break;
-            case 1:
-                scaleFactor = 1.0f;
-                previewSize = 45f;
-                break;
-            case 2:
-                scaleFactor = 1.1f;
-                previewSize = 50f;
-                break;
-        }
-
-        PlayerPrefs.SetFloat("FontScale", scaleFactor);
-
+    private void UpdateFontPreview(float scale)
+    {
         if (sizePreviewText != null)
         {
-            sizePreviewText.fontSize = previewSize;
+            sizePreviewText.fontSize = 45f * scale;
         }
-
-        if (OnFontSizeChanged != null) OnFontSizeChanged.Invoke(scaleFactor);
     }
 
     public void OnLanguageChanged(int index)
     {
-        string code = "EN";
-        switch (index)
+        string code = LanguageIndexToCode(index);
+        string currentProfileId = SubjectProfileService.GetCurrentProfileId();
+        SubjectProfileData currentProfile = null;
+
+        if (!string.IsNullOrWhiteSpace(currentProfileId))
         {
-            case 0: code = "EN"; break;
-            case 1: code = "ZH_CN"; break;
-            case 2: code = "JP"; break;
-            case 3: code = "KR"; break;
+            currentProfile = SubjectProfileService.LoadProfile(currentProfileId, createIfMissing: false);
+            if (currentProfile != null)
+            {
+                currentProfile.lockedGameLanguage = code;
+                if (!SubjectProfileService.SaveProfile(currentProfile))
+                {
+                    Debug.LogError($"[SubjectProfile] Could not save game language for {currentProfileId}.");
+                }
+            }
         }
 
-        PlayerPrefs.SetString("SelectedLanguage", code);
+        ApplyLanguage(code, syncDropdown: false);
+
+        if (TelemetryManager.Instance != null && currentProfile != null)
+        {
+            TelemetryManager.Instance.UpdateSubjectProfile(currentProfile);
+            TelemetryManager.Instance.LogEvent("profile_language_changed", code);
+        }
+
+        if (string.IsNullOrWhiteSpace(currentProfileId))
+        {
+            Debug.Log($"[Language] Default language for the next subject set to {code}.");
+        }
+        else
+        {
+            Debug.Log($"[Language] {currentProfileId} game language set to {code}.");
+        }
+    }
+
+    private void ApplyLanguage(string languageCode, bool syncDropdown)
+    {
+        string normalizedCode = NormalizeLanguageCode(languageCode);
+        PlayerPrefs.SetString("SelectedLanguage", normalizedCode);
         PlayerPrefs.Save();
 
         if (LocalizationManager.Instance != null)
         {
-            LocalizationManager.Instance.ChangeLanguage(code);
+            LocalizationManager.Instance.ChangeLanguage(normalizedCode);
+        }
+
+        if (syncDropdown)
+        {
+            SyncLanguageDropdown(normalizedCode);
+        }
+    }
+
+    private void SyncLanguageDropdown(string languageCode)
+    {
+        if (langDropdown == null)
+        {
+            return;
+        }
+
+        langDropdown.SetValueWithoutNotify(LanguageCodeToIndex(languageCode));
+        langDropdown.RefreshShownValue();
+    }
+
+    private static string LanguageIndexToCode(int index)
+    {
+        switch (index)
+        {
+            case 1: return "ZH_CN";
+            case 2: return "JP";
+            case 3: return "KR";
+            default: return "EN";
+        }
+    }
+
+    private static int LanguageCodeToIndex(string code)
+    {
+        switch (NormalizeLanguageCode(code))
+        {
+            case "ZH_CN": return 1;
+            case "JP": return 2;
+            case "KR": return 3;
+            default: return 0;
+        }
+    }
+
+    private static string NormalizeLanguageCode(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return "EN";
+        }
+
+        switch (code.Trim().ToUpperInvariant())
+        {
+            case "ZH":
+            case "ZH-CN":
+            case "ZH_CN":
+            case "CHINESE":
+                return "ZH_CN";
+            case "JA":
+            case "JA-JP":
+            case "JAPANESE":
+            case "JP":
+                return "JP";
+            case "KO":
+            case "KO-KR":
+            case "KOREAN":
+            case "KR":
+                return "KR";
+            default:
+                return "EN";
         }
     }
 
     public void OnBtnDonationClick()
     {
-        Application.OpenURL("https://space.bilibili.com/9039940");
+        Application.OpenURL("https" + "://space.bilibili.com/9039940");
     }
 
     public class UISmoothPopup : MonoBehaviour
     {
         public CanvasGroup canvasGroup;
         public float speed = 5f;
-        private bool _isOpening = false;
+        private bool _isOpening;
 
         void OnEnable()
         {
@@ -387,11 +555,16 @@ public class MainMenuController : MonoBehaviour
 
         void Update()
         {
-            if (_isOpening && canvasGroup != null)
+            if (!_isOpening || canvasGroup == null)
             {
-                canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, 1f, Time.deltaTime * speed);
-                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one, Time.deltaTime * speed);
-                if (canvasGroup.alpha >= 1f) _isOpening = false;
+                return;
+            }
+
+            canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, 1f, Time.deltaTime * speed);
+            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one, Time.deltaTime * speed);
+            if (canvasGroup.alpha >= 1f)
+            {
+                _isOpening = false;
             }
         }
     }

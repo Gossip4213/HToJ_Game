@@ -7,11 +7,11 @@ using TMPro;
 
 public class InGameMenuController : MonoBehaviour
 {
-    [Header("UI √Ê∞Â”ÎœµÕ≥")]
+    [Header("UI Èù¢Êùø‰∏éÁ≥ªÁªü")]
     public GameObject pauseMenuPanel;
-    public SaveLoadMenuController saveLoadMenu; 
+    public SaveLoadMenuController saveLoadMenu;
 
-    [Header("…Ë÷√◊Èº˛ (¥”÷˜≤Àµ•ºÃ≥–)")]
+    [Header("ËÆæÁΩÆÁªÑ‰ª∂ (‰ªé‰∏ªËèúÂçïÁªßÊâø)")]
     public TMP_Dropdown resDropdown;
     public Toggle windowedToggle;
     public Toggle skipUnreadToggle;
@@ -22,53 +22,73 @@ public class InGameMenuController : MonoBehaviour
     public TextMeshProUGUI speedPreviewText;
     public TextMeshProUGUI sizePreviewText;
 
-    private bool isPaused = false;
-    private Resolution[] resolutions;
+    private bool isPaused;
     private Coroutine _typingCoroutine;
-    private string _previewContent = "Hmm... is it heads or tails this time? I am not sure....";
+    private readonly string _previewContent = "Hmm... is it heads or tails this time? I am not sure....";
 
     void Start()
     {
-        if (pauseMenuPanel != null) pauseMenuPanel.SetActive(false);
-        Time.timeScale = 1f;
+        if (pauseMenuPanel != null)
+        {
+            pauseMenuPanel.SetActive(false);
+        }
 
+        Time.timeScale = 1f;
         InitSettingsUI();
+        SettingsService.ApplyRuntimeSettings();
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (isPaused) ResumeGame();
-            else PauseGame();
+            if (isPaused)
+            {
+                ResumeGame();
+            }
+            else
+            {
+                PauseGame();
+            }
         }
     }
-
 
     public void PauseGame()
     {
         isPaused = true;
-        if (pauseMenuPanel != null) pauseMenuPanel.SetActive(true);
-        Time.timeScale = 0f; 
+        if (pauseMenuPanel != null)
+        {
+            pauseMenuPanel.SetActive(true);
+        }
+
+        Time.timeScale = 0f;
     }
 
     public void ResumeGame()
     {
         isPaused = false;
-        if (pauseMenuPanel != null) pauseMenuPanel.SetActive(false);
-        Time.timeScale = 1f; 
-    }
+        if (pauseMenuPanel != null)
+        {
+            pauseMenuPanel.SetActive(false);
+        }
 
- 
+        Time.timeScale = 1f;
+    }
 
     public void OnBtnSaveClick()
     {
-        if (saveLoadMenu != null) saveLoadMenu.ShowMenu(true);
+        if (saveLoadMenu != null)
+        {
+            saveLoadMenu.ShowMenu(true);
+        }
     }
 
     public void OnBtnLoadClick()
     {
-        if (saveLoadMenu != null) saveLoadMenu.ShowMenu(false);
+        if (saveLoadMenu != null)
+        {
+            saveLoadMenu.ShowMenu(false);
+        }
     }
 
     public void ReturnToTitle()
@@ -76,12 +96,13 @@ public class InGameMenuController : MonoBehaviour
         if (TelemetryManager.Instance != null)
         {
             TelemetryManager.Instance.LogEvent("return_to_title", "escaped_to_main_menu");
-            TelemetryManager.Instance.SaveToLocal(); 
+            TelemetryManager.Instance.SaveToLocal();
         }
 
-        Time.timeScale = 1f; 
+        Time.timeScale = 1f;
         SceneManager.LoadScene("MainMenu");
     }
+
     public void QuitGame()
     {
         if (TelemetryManager.Instance != null)
@@ -100,141 +121,132 @@ public class InGameMenuController : MonoBehaviour
 #endif
     }
 
-    void InitSettingsUI()
+    private void InitSettingsUI()
     {
-        Vector2Int[] targetRes = new Vector2Int[]
-        {
-            new Vector2Int(3840, 2160), new Vector2Int(2560, 1440),
-            new Vector2Int(1920, 1080), new Vector2Int(1600, 900), new Vector2Int(1280, 720)
-        };
-
         if (resDropdown != null)
         {
             resDropdown.ClearOptions();
             List<string> options = new List<string>();
-            int currentResIndex = 2;
-            List<Resolution> customResList = new List<Resolution>();
-
-            for (int i = 0; i < targetRes.Length; i++)
+            foreach (Vector2Int resolution in SettingsService.SupportedResolutions)
             {
-                options.Add(targetRes[i].x + " x " + targetRes[i].y);
-                Resolution r = new Resolution();
-                r.width = targetRes[i].x;
-                r.height = targetRes[i].y;
-                customResList.Add(r);
-                if (Screen.width == targetRes[i].x && Screen.height == targetRes[i].y) currentResIndex = i;
+                options.Add(resolution.x + " x " + resolution.y);
             }
-            resolutions = customResList.ToArray();
+
             resDropdown.AddOptions(options);
-            resDropdown.value = currentResIndex;
+            resDropdown.SetValueWithoutNotify(SettingsService.FindCurrentResolutionIndex());
             resDropdown.RefreshShownValue();
         }
 
-        if (windowedToggle != null) windowedToggle.isOn = !Screen.fullScreen;
+        if (windowedToggle != null)
+        {
+            windowedToggle.SetIsOnWithoutNotify(!Screen.fullScreen);
+        }
 
         if (musicSlider != null)
         {
-            float savedVol = PlayerPrefs.GetFloat("MusicVol", 0.75f);
-            musicSlider.value = savedVol;
+            musicSlider.SetValueWithoutNotify(SettingsService.MusicVolume);
         }
 
-        if (sfxSlider != null) sfxSlider.value = PlayerPrefs.GetFloat("SFXVol", 0.75f);
-        if (textSpeedSlider != null) textSpeedSlider.value = PlayerPrefs.GetInt("TextSpeedLevel", 1);
-        if (skipUnreadToggle != null) skipUnreadToggle.isOn = PlayerPrefs.GetInt("SkipUnread", 0) == 1;
+        if (sfxSlider != null)
+        {
+            sfxSlider.SetValueWithoutNotify(SettingsService.SfxVolume);
+        }
+
+        if (textSpeedSlider != null)
+        {
+            textSpeedSlider.SetValueWithoutNotify(SettingsService.TextSpeedLevel);
+        }
+
+        if (skipUnreadToggle != null)
+        {
+            skipUnreadToggle.SetIsOnWithoutNotify(SettingsService.SkipUnread);
+        }
 
         if (fontSizeSlider != null)
         {
             fontSizeSlider.minValue = 0;
             fontSizeSlider.maxValue = 2;
             fontSizeSlider.wholeNumbers = true;
-            fontSizeSlider.value = PlayerPrefs.GetInt("FontSizeLevel", 1);
+            fontSizeSlider.SetValueWithoutNotify(SettingsService.FontSizeLevel);
         }
+
+        UpdateFontPreview(SettingsService.FontScale);
     }
 
     public void SetResolution(int index)
     {
-        if (resolutions == null || index < 0 || index >= resolutions.Length) return;
-        Resolution res = resolutions[index];
-        Screen.SetResolution(res.width, res.height, Screen.fullScreen);
+        SettingsService.SetResolution(index);
     }
 
     public void SetWindowed(bool isWindowed)
     {
-        Screen.fullScreenMode = isWindowed ? FullScreenMode.Windowed : FullScreenMode.FullScreenWindow;
+        SettingsService.SetWindowed(isWindowed);
     }
 
-    public void SetMusicVolume(float val)
+    public void SetMusicVolume(float value)
     {
-        PlayerPrefs.SetFloat("MusicVol", val);
-        if (GameSystem.Instance != null) GameSystem.Instance.SetMusicVolume(val);
+        SettingsService.SetMusicVolume(value);
     }
 
-    public void SetSFXVolume(float val)
+    public void SetSFXVolume(float value)
     {
-        PlayerPrefs.SetFloat("SFXVol", val);
-        if (GameSystem.Instance != null) GameSystem.Instance.SetSFXVolume(val); 
+        SettingsService.SetSfxVolume(value);
     }
 
-    public void SetTextSpeed(float val)
+    public void SetTextSpeed(float value)
     {
-        int level = Mathf.RoundToInt(val);
-        float charDelay = 0.05f;
+        float delay = SettingsService.SetTextSpeedLevel(value);
+        StartSpeedPreview(delay);
+    }
 
-        switch (level)
+    private void StartSpeedPreview(float delay)
+    {
+        if (speedPreviewText == null)
         {
-            case 0: charDelay = 0.1f; break;
-            case 1: charDelay = 0.05f; break;
-            case 2: charDelay = 0.02f; break;
+            return;
         }
 
-        PlayerPrefs.SetInt("TextSpeedLevel", level);
-
-        if (speedPreviewText != null)
+        if (_typingCoroutine != null)
         {
-            if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
-            _typingCoroutine = StartCoroutine(RunTypewriterEffect(charDelay));
+            StopCoroutine(_typingCoroutine);
         }
+
+        _typingCoroutine = StartCoroutine(RunTypewriterEffect(delay));
     }
 
-    IEnumerator RunTypewriterEffect(float delay)
+    private IEnumerator RunTypewriterEffect(float delay)
     {
-        speedPreviewText.text = "";
+        speedPreviewText.text = string.Empty;
         while (true)
         {
-            foreach (char c in _previewContent)
+            foreach (char character in _previewContent)
             {
-                speedPreviewText.text += c;
+                speedPreviewText.text += character;
                 yield return new WaitForSecondsRealtime(delay);
             }
 
-            yield return new WaitForSecondsRealtime(1.0f);
-            speedPreviewText.text = "";
+            yield return new WaitForSecondsRealtime(1f);
+            speedPreviewText.text = string.Empty;
         }
     }
 
     public void SetSkipUnread(bool isOn)
     {
-        PlayerPrefs.SetInt("SkipUnread", isOn ? 1 : 0);
+        SettingsService.SetSkipUnread(isOn);
     }
 
-    public void SetFontSize(float val)
+    public void SetFontSize(float value)
     {
-        int level = Mathf.RoundToInt(val);
-        PlayerPrefs.SetInt("FontSizeLevel", level);
+        float scale = SettingsService.SetFontSizeLevel(value);
+        UpdateFontPreview(scale);
+        MainMenuController.OnFontSizeChanged?.Invoke(scale);
+    }
 
-        float scaleFactor = 1.0f;
-        float previewSize = 45f;
-
-        switch (level)
+    private void UpdateFontPreview(float scale)
+    {
+        if (sizePreviewText != null)
         {
-            case 0: scaleFactor = 0.9f; previewSize = 40f; break;
-            case 1: scaleFactor = 1.0f; previewSize = 45f; break;
-            case 2: scaleFactor = 1.1f; previewSize = 50f; break;
+            sizePreviewText.fontSize = 45f * scale;
         }
-
-        PlayerPrefs.SetFloat("FontScale", scaleFactor);
-        if (sizePreviewText != null) sizePreviewText.fontSize = previewSize;
-
-        if (MainMenuController.OnFontSizeChanged != null) MainMenuController.OnFontSizeChanged.Invoke(scaleFactor);
     }
 }

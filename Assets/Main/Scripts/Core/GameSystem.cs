@@ -1,13 +1,16 @@
-﻿using UnityEngine;
+using System;
 using System.IO;
-using System.Collections;
-using UnityEngine.Networking;
 using System.Text;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameSystem : MonoBehaviour
 {
     public static GameSystem Instance { get; private set; }
+
+    private const int SaveSlotCount = 6;
+    private const int CurrentSaveSchemaVersion = 1;
+    private const string LegacyMigrationKey = "LegacySavesMigrated_v1";
 
     public PlayerSaveProfile CurrentSave;
     public bool isLoadingFromSave = false;
@@ -35,163 +38,54 @@ public class GameSystem : MonoBehaviour
 
     void Start()
     {
-        float savedVol = PlayerPrefs.GetFloat("MusicVol", 0.75f);
-        SetMusicVolume(savedVol);
+        SetMusicVolume(PlayerPrefs.GetFloat("MusicVol", 0.75f));
+        SetSFXVolume(PlayerPrefs.GetFloat("SFXVol", 0.75f));
+
         if (bgmSource != null && !bgmSource.isPlaying)
         {
             bgmSource.Play();
         }
-        float savedSfxVol = PlayerPrefs.GetFloat("SFXVol", 0.75f);
-        SetSFXVolume(savedSfxVol);
     }
 
     void InitializeSystem()
     {
-        CurrentSave = new PlayerSaveProfile();
-        CurrentSave.languageCode = PlayerPrefs.GetString("SelectedLanguage", "EN");
-        Debug.Log($"<color=red>[Critical] Save File: {Application.persistentDataPath}</color>");
+        CurrentSave = CreateNewSaveProfile();
+        MigrateLegacySavesForCurrentProfile();
 
+        Debug.Log($"[System] Save directory: {StoragePaths.GetSaveDirectory()}");
         Debug.Log($"[System] System initialized. Default Language: {CurrentSave.languageCode}");
     }
+
+    private PlayerSaveProfile CreateNewSaveProfile()
+    {
+        return new PlayerSaveProfile
+        {
+            schemaVersion = CurrentSaveSchemaVersion,
+            gameVersion = Application.version,
+            playerName = PlayerPrefs.GetString("CurrentUser", "Observer"),
+            languageCode = PlayerPrefs.GetString("SelectedLanguage", "EN"),
+            bgmVolume = PlayerPrefs.GetFloat("MusicVol", 0.75f),
+            sfxVolume = PlayerPrefs.GetFloat("SFXVol", 0.75f)
+        };
+    }
+
+    public void BeginNewGame()
+    {
+        CurrentSave = CreateNewSaveProfile();
+        isLoadingFromSave = false;
+    }
+
     public void SetSFXVolume(float volume)
     {
         if (sfxSource != null)
         {
             sfxSource.volume = volume;
         }
-    }
-    public string GetSavePath(int slotIndex)
-    {
-        return Path.Combine(Application.persistentDataPath, $"save_data_{slotIndex}.json");
-    }
 
-    public bool HasSaveFile(int slotIndex)
-    {
-        return File.Exists(GetSavePath(slotIndex));
-    }
-    public bool HasAnySaveFile()
-    {
-        Debug.Log("searching saves");
-        for (int i = 0; i < 6; i++)
+        if (CurrentSave != null)
         {
-            string path = GetSavePath(i);
-            bool exists = File.Exists(path);
-            if (exists)
-            {
-                Debug.Log($"slot found{i} | path: {path}");
-                return true;
-            }
-            else
-            {
-                if (i == 0) Debug.Log($"slot 0 empty | path: {path}");
-            }
+            CurrentSave.sfxVolume = volume;
         }
-        Debug.Log("no save");
-        return false;
-    }
-    public PlayerSaveProfile GetSaveProfile(int slotIndex)
-    {
-        string path = GetSavePath(slotIndex);
-        if (File.Exists(path))
-        {
-            try
-            {
-                string json = File.ReadAllText(path);
-                return JsonUtility.FromJson<PlayerSaveProfile>(json);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    public void SaveGame(int slotIndex)
-    {
-        CurrentSave.currentSceneName = SceneManager.GetActiveScene().name;
-        CurrentSave.saveTime = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm");
-
-        DialogueController dc = UnityEngine.Object.FindFirstObjectByType<DialogueController>(); 
-        if (dc != null && dc.story != null)
-        {
-            CurrentSave.inkStoryState = dc.story.state.ToJson();
-            Debug.Log("【系统】已成功提取当前对话时间线。");
-        }
-        else
-        {
-            Debug.LogWarning("【警告】当前场景没有找到对话控制器，未能保存！");
-        }
-
-        string json = JsonUtility.ToJson(CurrentSave, true);
-        File.WriteAllText(GetSavePath(slotIndex), json);
-
-        Debug.Log($"[System] Game Saved to Slot {slotIndex} | 锚点: {CurrentSave.currentSceneName}");
-    }
-
-    public void LoadAndStartGame(int slotIndex)
-    {
-        string path = GetSavePath(slotIndex);
-        if (!File.Exists(path))
-        {
-            Debug.LogWarning($"Slot {slotIndex} is empty!");
-            return;
-        }
-
-        string json = File.ReadAllText(path);
-        CurrentSave = JsonUtility.FromJson<PlayerSaveProfile>(json);
-
-        isLoadingFromSave = true;
-
-        string sceneToLoad = string.IsNullOrEmpty(CurrentSave.currentSceneName) ? "Prologue" : CurrentSave.currentSceneName;
-        Debug.Log($"[System] Loading Slot {slotIndex}... Jumping to: {sceneToLoad}");
-
-        SceneManager.LoadScene(sceneToLoad);
-    }
-
-
-    public void UploadChoice(string choiceID)
-    {
-        StartCoroutine(PostDataCoroutine(choiceID));
-    }
-
-    IEnumerator PostDataCoroutine(string choiceID)
-    {
-        string url = "https://";
-        ObservationLog log = new ObservationLog();
-        log.userId = SystemInfo.deviceUniqueIdentifier;
-        log.choiceId = choiceID;
-        log.timestamp = System.DateTime.Now.ToString();
-
-        string json = JsonUtility.ToJson(log);
-
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        yield return request.SendWebRequest();
-
-        if (request.result != UnityWebRequest.Result.Success)
-        {
-            Debug.LogWarning("[Data] upload fail: " + request.error);
-        }
-        else
-        {
-            Debug.Log("[Data] upload success: " + choiceID);
-        }
-    }
-
-    public void SwitchLanguage(string langCode)
-    {
-        CurrentSave.languageCode = langCode;
-        if (OnLanguageChanged != null) OnLanguageChanged.Invoke();
-    }
-
-    public string GetLocalizedString(string key)
-    {
-        return "L10N_" + key;
     }
 
     public void SetMusicVolume(float volume)
@@ -200,7 +94,242 @@ public class GameSystem : MonoBehaviour
         {
             bgmSource.volume = volume;
         }
+
+        if (CurrentSave != null)
+        {
+            CurrentSave.bgmVolume = volume;
+        }
     }
 
+    public string GetSavePath(int slotIndex)
+    {
+        return StoragePaths.GetSavePath(slotIndex);
+    }
 
+    public bool HasSaveFile(int slotIndex)
+    {
+        return File.Exists(GetSavePath(slotIndex));
+    }
+
+    public bool HasAnySaveFile()
+    {
+        for (int i = 0; i < SaveSlotCount; i++)
+        {
+            if (HasSaveFile(i))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public PlayerSaveProfile GetSaveProfile(int slotIndex)
+    {
+        string path = GetSavePath(slotIndex);
+        if (!File.Exists(path))
+        {
+            return null;
+        }
+
+        try
+        {
+            string json = File.ReadAllText(path, Encoding.UTF8);
+            PlayerSaveProfile profile = JsonUtility.FromJson<PlayerSaveProfile>(json);
+            return UpgradeSaveProfile(profile);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError($"[System] Failed to read save slot {slotIndex}: {exception.Message}");
+            return null;
+        }
+    }
+
+    public void SaveGame(int slotIndex)
+    {
+        if (CurrentSave == null)
+        {
+            CurrentSave = CreateNewSaveProfile();
+        }
+
+        CurrentSave.schemaVersion = CurrentSaveSchemaVersion;
+        CurrentSave.gameVersion = Application.version;
+        CurrentSave.playerName = PlayerPrefs.GetString("CurrentUser", CurrentSave.playerName);
+        CurrentSave.currentSceneName = SceneManager.GetActiveScene().name;
+        CurrentSave.saveTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm");
+        CurrentSave.languageCode = PlayerPrefs.GetString("SelectedLanguage", CurrentSave.languageCode);
+        CurrentSave.bgmVolume = PlayerPrefs.GetFloat("MusicVol", CurrentSave.bgmVolume);
+        CurrentSave.sfxVolume = PlayerPrefs.GetFloat("SFXVol", CurrentSave.sfxVolume);
+
+        DialogueController dialogueController = UnityEngine.Object.FindFirstObjectByType<DialogueController>();
+        if (dialogueController != null && dialogueController.story != null)
+        {
+            CurrentSave.inkStoryState = dialogueController.story.state.ToJson();
+        }
+        else
+        {
+            Debug.LogWarning("[System] No active DialogueController was found. Ink state was not updated.");
+        }
+
+        string path = GetSavePath(slotIndex);
+        string json = JsonUtility.ToJson(CurrentSave, true);
+
+        try
+        {
+            WriteTextSafely(path, json);
+            Debug.Log($"[System] Game saved to slot {slotIndex}: {path}");
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError($"[System] Failed to save slot {slotIndex}: {exception.Message}");
+        }
+    }
+
+    public void LoadAndStartGame(int slotIndex)
+    {
+        PlayerSaveProfile loadedProfile = GetSaveProfile(slotIndex);
+        if (loadedProfile == null)
+        {
+            Debug.LogWarning($"[System] Slot {slotIndex} is empty or unreadable.");
+            return;
+        }
+
+        CurrentSave = loadedProfile;
+        isLoadingFromSave = true;
+
+        if (!string.IsNullOrEmpty(CurrentSave.languageCode))
+        {
+            PlayerPrefs.SetString("SelectedLanguage", CurrentSave.languageCode);
+            PlayerPrefs.Save();
+        }
+
+        string sceneToLoad = string.IsNullOrEmpty(CurrentSave.currentSceneName)
+            ? "Prologue"
+            : CurrentSave.currentSceneName;
+
+        Debug.Log($"[System] Loading slot {slotIndex}. Scene: {sceneToLoad}");
+        SceneManager.LoadScene(sceneToLoad);
+    }
+
+    public void UploadChoice(string choiceID)
+    {
+        if (TelemetryManager.Instance != null)
+        {
+            TelemetryManager.Instance.LogEvent("legacy_choice", choiceID, 0f, "GameSystem.UploadChoice");
+        }
+        else
+        {
+            Debug.LogWarning("[System] TelemetryManager is unavailable. Choice was not logged.");
+        }
+    }
+
+    public void SwitchLanguage(string langCode)
+    {
+        if (CurrentSave == null)
+        {
+            CurrentSave = CreateNewSaveProfile();
+        }
+
+        CurrentSave.languageCode = langCode;
+        PlayerPrefs.SetString("SelectedLanguage", langCode);
+        PlayerPrefs.Save();
+        OnLanguageChanged?.Invoke();
+    }
+
+    public string GetLocalizedString(string key)
+    {
+        return "L10N_" + key;
+    }
+
+    private PlayerSaveProfile UpgradeSaveProfile(PlayerSaveProfile profile)
+    {
+        if (profile == null)
+        {
+            return null;
+        }
+
+        if (profile.schemaVersion <= 0)
+        {
+            profile.schemaVersion = CurrentSaveSchemaVersion;
+        }
+
+        if (string.IsNullOrEmpty(profile.gameVersion))
+        {
+            profile.gameVersion = "legacy";
+        }
+
+        if (profile.choicesHistory == null)
+        {
+            profile.choicesHistory = new System.Collections.Generic.List<ChoiceRecord>();
+        }
+
+        return profile;
+    }
+
+    private void MigrateLegacySavesForCurrentProfile()
+    {
+        string currentUser = PlayerPrefs.GetString("CurrentUser", "");
+        if (string.IsNullOrWhiteSpace(currentUser) || PlayerPrefs.HasKey(LegacyMigrationKey))
+        {
+            return;
+        }
+
+        bool migratedAnySave = false;
+
+        for (int slotIndex = 0; slotIndex < SaveSlotCount; slotIndex++)
+        {
+            string legacyPath = Path.Combine(Application.persistentDataPath, $"save_data_{slotIndex}.json");
+            string profilePath = GetSavePath(slotIndex);
+
+            if (!File.Exists(legacyPath) || File.Exists(profilePath))
+            {
+                continue;
+            }
+
+            try
+            {
+                File.Copy(legacyPath, profilePath, false);
+                migratedAnySave = true;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[System] Failed to migrate legacy slot {slotIndex}: {exception.Message}");
+                return;
+            }
+        }
+
+        PlayerPrefs.SetString(LegacyMigrationKey, currentUser);
+        PlayerPrefs.Save();
+
+        if (migratedAnySave)
+        {
+            Debug.Log($"[System] Legacy saves were migrated to profile '{currentUser}'.");
+        }
+    }
+
+    private static void WriteTextSafely(string path, string content)
+    {
+        string directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        string temporaryPath = path + ".tmp";
+        string backupPath = path + ".bak";
+        File.WriteAllText(temporaryPath, content, Encoding.UTF8);
+
+        if (File.Exists(path))
+        {
+            File.Replace(temporaryPath, path, backupPath, true);
+            if (File.Exists(backupPath))
+            {
+                File.Delete(backupPath);
+            }
+        }
+        else
+        {
+            File.Move(temporaryPath, path);
+        }
+    }
 }
