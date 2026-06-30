@@ -1,4 +1,6 @@
-// Included by Chapter1_EN.ink as the third playable prototype chapter.
+// Standalone third chapter. Mount Chapter2_EN.json on the Chapter2_Test scene.
+
+-> robin_hood_intro
 
 === robin_hood_intro ===
 #speaker: The Judge: Third Deliberation
