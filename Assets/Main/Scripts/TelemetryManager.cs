@@ -54,6 +54,7 @@ public class TelemetryManager : MonoBehaviour
     [Header("永久服务器配置 (Google Form)")]
     public string googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSe4wSGCznH3u_waDeuFe1BDzT7xCQmn_iEFwce0y2C7Ql08Ww/viewform?usp=dialog";
 
+
     [Header("表单 Entry ID 映射")]
     public string entryID_DeviceID = "entry.1219463742";
     public string entryID_SubjectID = "entry.456655523";
