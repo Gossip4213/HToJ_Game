@@ -3,7 +3,7 @@
 -> robin_hood_intro
 
 === robin_hood_intro ===
-#speaker: The Judge: Third Deliberation
+#speaker: The Judge
 #bgm: Dilemma
 A severe winter has damaged the harvest across the county.
 A tax convoy is carrying 1,200 silver marks to the capital. Most of the money was collected from large landholders, while the rest came from merchants, tenant fees, and market tolls.

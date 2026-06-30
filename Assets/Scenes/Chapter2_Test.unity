@@ -2095,8 +2095,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d6713a5497c9e14ba9c4bd6d145ef18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inkJSON_EN: {fileID: 4900000, guid: cc18f916ceaf986468cee3a501e7d078, type: 3}
-  inkJSON_ZH: {fileID: 4900000, guid: cc18f916ceaf986468cee3a501e7d078, type: 3}
+  inkJSON_EN: {fileID: 4900000, guid: 325f60c26da90fc45987d5802a60bd6f, type: 3}
+  inkJSON_ZH: {fileID: 4900000, guid: 325f60c26da90fc45987d5802a60bd6f, type: 3}
   choiceBubblePanel: {fileID: 1432540830}
   choiceButtons:
   - {fileID: 1131757005}
@@ -2606,7 +2606,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3af2a47b58ffbb24e902b3aaecd1c2bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneMusic: {fileID: 8300000, guid: 2614779916c06094ba219cbbe39950fe, type: 3}
+  sceneMusic: {fileID: 8300000, guid: 812240703d8f1ec4abe391dc6aec50f4, type: 3}
 --- !u!1 &565630396
 GameObject:
   m_ObjectHideFlags: 0
@@ -6701,8 +6701,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 91, y: -31}
-  m_SizeDelta: {x: 608.7991, y: 514.0821}
+  m_AnchoredPosition: {x: 82, y: 87}
+  m_SizeDelta: {x: 602.0082, y: 380.982}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1417831613
 MonoBehaviour:
@@ -11659,8 +11659,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -661, y: -167.79}
-  m_SizeDelta: {x: 364.2316, y: 345.93}
+  m_AnchoredPosition: {x: -675, y: -135}
+  m_SizeDelta: {x: 319.4121, y: 321.4831}
   m_Pivot: {x: 0.5, y: 0.14400579}
 --- !u!114 &2062902364
 MonoBehaviour:
