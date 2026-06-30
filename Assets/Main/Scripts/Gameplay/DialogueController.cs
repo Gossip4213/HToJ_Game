@@ -24,18 +24,41 @@ public class DialogueController : MonoBehaviour
     public TextMeshProUGUI txtBody;
     public GameObject continueIcon;
 
-    [Header("Settings")]
-    public float typeSpeed = 0.05f; 
+    [Header("Legacy Fallback Setting")]
+    [Tooltip("Used only if no saved text-speed setting is available.")]
+    public float typeSpeed = 0.05f;
 
-    private bool _isTyping = false;
-    private string _currentFullText = "";
+    private bool _isTyping;
+    private string _currentFullText = string.Empty;
     private Coroutine _typingCoroutine;
-    private float _choiceStartTime = 0f;
+    private float _choiceStartTime;
+    private float _baseSpeakerFontSize;
+    private float _baseBodyFontSize;
+
+    void Awake()
+    {
+        if (txtSpeaker != null)
+        {
+            _baseSpeakerFontSize = txtSpeaker.fontSize;
+        }
+
+        if (txtBody != null)
+        {
+            _baseBodyFontSize = txtBody.fontSize;
+        }
+    }
+
     void Start()
     {
-        if (continueIcon != null) continueIcon.SetActive(false);
+        if (continueIcon != null)
+        {
+            continueIcon.SetActive(false);
+        }
+
+        ApplyTextSettings();
         StartStory();
     }
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -44,6 +67,7 @@ public class DialogueController : MonoBehaviour
             {
                 return;
             }
+
             OnUserClick();
         }
     }
@@ -51,17 +75,14 @@ public class DialogueController : MonoBehaviour
     private void OnEnable()
     {
         UpdateFonts();
+        ApplyTextSettings();
+
         if (LocalizationManager.Instance != null)
         {
             LocalizationManager.Instance.OnLanguageChanged += UpdateFonts;
         }
 
-        LoadStoryByLanguage();
-
-        if (!_isTyping && story != null)
-        {
-            txtBody.text = story.currentText.Trim();
-        }
+        SettingsService.OnFontScaleChanged += ApplyFontScale;
     }
 
     void OnDisable()
@@ -70,32 +91,70 @@ public class DialogueController : MonoBehaviour
         {
             LocalizationManager.Instance.OnLanguageChanged -= UpdateFonts;
         }
+
+        SettingsService.OnFontScaleChanged -= ApplyFontScale;
+    }
+
+    private void ApplyTextSettings()
+    {
+        ApplyFontScale(SettingsService.FontScale);
+    }
+
+    private void ApplyFontScale(float scale)
+    {
+        if (txtSpeaker != null && _baseSpeakerFontSize > 0f)
+        {
+            txtSpeaker.fontSize = _baseSpeakerFontSize * scale;
+        }
+
+        if (txtBody != null && _baseBodyFontSize > 0f)
+        {
+            txtBody.fontSize = _baseBodyFontSize * scale;
+        }
     }
 
     private void UpdateFonts()
     {
-        if (LocalizationManager.Instance != null)
+        if (LocalizationManager.Instance == null)
         {
-            TMP_FontAsset globalFont = LocalizationManager.Instance.GetCurrentFont();
-            if (globalFont != null)
-            {
-                if (txtSpeaker != null) txtSpeaker.font = globalFont;
-                if (txtBody != null) txtBody.font = globalFont;
-            }
+            return;
+        }
+
+        TMP_FontAsset globalFont = LocalizationManager.Instance.GetCurrentFont();
+        if (globalFont == null)
+        {
+            return;
+        }
+
+        if (txtSpeaker != null)
+        {
+            txtSpeaker.font = globalFont;
+        }
+
+        if (txtBody != null)
+        {
+            txtBody.font = globalFont;
         }
     }
 
     public void NotifyHoverUI(string thought)
     {
         _isTyping = false;
-        if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
+        if (_typingCoroutine != null)
+        {
+            StopCoroutine(_typingCoroutine);
+        }
 
         if (txtBody != null)
         {
             txtBody.text = thought;
             txtBody.maxVisibleCharacters = 99999;
         }
-        if (txtSpeaker != null) txtSpeaker.text = "Thinking";
+
+        if (txtSpeaker != null)
+        {
+            txtSpeaker.text = "Thinking";
+        }
     }
 
     public void NotifyExitUI()
@@ -109,38 +168,42 @@ public class DialogueController : MonoBehaviour
 
     public void SelectThisObject(string id)
     {
-        
-        if (story == null || story.currentChoices.Count == 0) return;
+        if (story == null || story.currentChoices.Count == 0)
+        {
+            return;
+        }
 
         float hesitationDuration = Time.realtimeSinceStartup - _choiceStartTime;
 
-        for (int i = 0; i < story.currentChoices.Count; i++)
+        for (int index = 0; index < story.currentChoices.Count; index++)
         {
-            Choice choice = story.currentChoices[i];
-            if (choice.tags != null)
+            Choice choice = story.currentChoices[index];
+            if (choice.tags == null)
             {
-                foreach (string tag in choice.tags)
+                continue;
+            }
+
+            foreach (string tag in choice.tags)
+            {
+                if (tag.Trim() != "id:" + id.Trim())
                 {
-                    if (tag.Trim() == "id:" + id.Trim())
-                    {
-                        Debug.Log($"[recording] 玩家在房间里发呆了 {hesitationDuration:F2} 秒后，调查了 [{id}]");
-
-                        if (TelemetryManager.Instance != null)
-                        {
-                            TelemetryManager.Instance.LogEvent("investigate_object", id, hesitationDuration);
-                        }
-
-                        story.ChooseChoiceIndex(i);
-                        NotifyExitUI();
-                        DisplayNextLine();
-                        return;
-                    }
+                    continue;
                 }
+
+                Debug.Log($"[Telemetry] Investigated [{id}] after {hesitationDuration:F2} seconds.");
+
+                if (TelemetryManager.Instance != null)
+                {
+                    TelemetryManager.Instance.LogEvent("investigate_object", id, hesitationDuration);
+                }
+
+                story.ChooseChoiceIndex(index);
+                NotifyExitUI();
+                DisplayNextLine();
+                return;
             }
         }
     }
-
-    // --- Ink ---
 
     public void StartStory()
     {
@@ -150,60 +213,74 @@ public class DialogueController : MonoBehaviour
 
     private void LoadStoryByLanguage()
     {
-        string currentLang = "EN";
-        if (LocalizationManager.Instance != null)
+        string currentLanguage = LocalizationManager.Instance != null
+            ? LocalizationManager.Instance.currentLanguage
+            : PlayerPrefs.GetString("SelectedLanguage", "EN");
+
+        TextAsset selectedJson = currentLanguage == "ZH_CN" && inkJSON_ZH != null
+            ? inkJSON_ZH
+            : inkJSON_EN;
+
+        if (selectedJson == null)
         {
-            currentLang = LocalizationManager.Instance.currentLanguage;
+            selectedJson = inkJSONAsset;
         }
 
-        TextAsset selectedJSON = (currentLang == "ZH_CN" && inkJSON_ZH != null) ? inkJSON_ZH : inkJSON_EN;
-
-        if (selectedJSON == null)
+        if (selectedJson == null)
         {
-            Debug.LogError("【Ink 错误】没有找到对应语言story");
+            Debug.LogError("[Ink] No story JSON is assigned for the selected language.");
             return;
         }
+
         if (GameSystem.Instance != null && GameSystem.Instance.isLoadingFromSave)
         {
-            story = new Story(selectedJSON.text); 
-            string savedState = GameSystem.Instance.CurrentSave.inkStoryState;
+            story = new Story(selectedJson.text);
+            string savedState = GameSystem.Instance.CurrentSave != null
+                ? GameSystem.Instance.CurrentSave.inkStoryState
+                : string.Empty;
 
             if (!string.IsNullOrEmpty(savedState))
             {
                 try
                 {
                     story.state.LoadJson(savedState);
-                    Debug.Log("【观测】完美到存档。");
+                    Debug.Log("[Ink] Save state restored.");
                 }
-                catch (System.Exception e)
+                catch (System.Exception exception)
                 {
-                    Debug.LogWarning("无法继承存档进度: " + e.Message);
+                    Debug.LogWarning("[Ink] Could not restore save state: " + exception.Message);
                 }
             }
+
             GameSystem.Instance.isLoadingFromSave = false;
         }
         else if (story != null)
         {
-            string savedState = story.state.ToJson();
-            story = new Story(selectedJSON.text);
+            string previousState = story.state.ToJson();
+            story = new Story(selectedJson.text);
+
             try
             {
-                story.state.LoadJson(savedState);
-                Debug.Log("多语言进度已继承");
+                story.state.LoadJson(previousState);
             }
-            catch (System.Exception e)
+            catch (System.Exception exception)
             {
-                Debug.LogWarning("剧本结构不一致，无法继承; 错误: " + e.Message);
+                Debug.LogWarning("[Ink] Story structures differ; previous state was not restored: " + exception.Message);
             }
         }
         else
         {
-            story = new Story(selectedJSON.text);
+            story = new Story(selectedJson.text);
         }
     }
 
     public void DisplayNextLine()
     {
+        if (story == null)
+        {
+            return;
+        }
+
         if (story.canContinue)
         {
             string cleanText = story.Continue().Trim();
@@ -215,7 +292,10 @@ public class DialogueController : MonoBehaviour
                 return;
             }
 
-            if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
+            if (_typingCoroutine != null)
+            {
+                StopCoroutine(_typingCoroutine);
+            }
 
             _typingCoroutine = StartCoroutine(SmoothTypeWriter(cleanText));
         }
@@ -223,68 +303,83 @@ public class DialogueController : MonoBehaviour
         {
             bool hasInvestigation = false;
 
-            foreach (var choice in story.currentChoices)
+            foreach (Choice choice in story.currentChoices)
             {
-                if (choice.tags != null)
+                if (choice.tags == null)
                 {
-                    foreach (string tag in choice.tags)
+                    continue;
+                }
+
+                foreach (string tag in choice.tags)
+                {
+                    if (tag.StartsWith("id:"))
                     {
-                        if (tag.StartsWith("id:")) hasInvestigation = true;
+                        hasInvestigation = true;
                     }
                 }
             }
 
             if (hasInvestigation)
             {
-                Debug.Log("【观测】进入调查模式，等待玩家点击场景物品...");
+                Debug.Log("[Ink] Investigation mode active.");
             }
 
             _choiceStartTime = Time.realtimeSinceStartup;
-
             ShowChoiceBubbles();
         }
     }
 
     private void ShowChoiceBubbles()
     {
-        if (choiceBubblePanel == null || choiceButtons == null) return;
-
-        int uiButtonIndex = 0; 
-        bool hasNormalChoices = false; 
-
-        for (int i = 0; i < story.currentChoices.Count; i++)
+        if (choiceBubblePanel == null || choiceButtons == null || story == null)
         {
-            bool isInvestigation = false;
-            if (story.currentChoices[i].tags != null)
-            {
-                foreach (string tag in story.currentChoices[i].tags)
-                {
-                    if (tag.StartsWith("id:")) isInvestigation = true;
-                }
-            }
-
-            if (!isInvestigation)
-            {
-                if (uiButtonIndex < choiceButtons.Length)
-                {
-                    choiceButtons[uiButtonIndex].gameObject.SetActive(true);
-
-                    TextMeshProUGUI btnText = choiceButtons[uiButtonIndex].GetComponentInChildren<TextMeshProUGUI>();
-                    if (btnText != null) btnText.text = story.currentChoices[i].text;
-
-                    int choiceIndex = i;
-                    choiceButtons[uiButtonIndex].onClick.RemoveAllListeners();
-                    choiceButtons[uiButtonIndex].onClick.AddListener(() => OnBubbleClicked(choiceIndex));
-
-                    uiButtonIndex++;
-                    hasNormalChoices = true;
-                }
-            }
+            return;
         }
 
-        for (int i = uiButtonIndex; i < choiceButtons.Length; i++)
+        int uiButtonIndex = 0;
+        bool hasNormalChoices = false;
+
+        for (int choiceIndex = 0; choiceIndex < story.currentChoices.Count; choiceIndex++)
         {
-            choiceButtons[i].gameObject.SetActive(false);
+            bool isInvestigation = false;
+            Choice choice = story.currentChoices[choiceIndex];
+
+            if (choice.tags != null)
+            {
+                foreach (string tag in choice.tags)
+                {
+                    if (tag.StartsWith("id:"))
+                    {
+                        isInvestigation = true;
+                    }
+                }
+            }
+
+            if (isInvestigation || uiButtonIndex >= choiceButtons.Length)
+            {
+                continue;
+            }
+
+            UnityEngine.UI.Button button = choiceButtons[uiButtonIndex];
+            button.gameObject.SetActive(true);
+
+            TextMeshProUGUI buttonText = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (buttonText != null)
+            {
+                buttonText.text = choice.text;
+            }
+
+            int capturedChoiceIndex = choiceIndex;
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(() => OnBubbleClicked(capturedChoiceIndex));
+
+            uiButtonIndex++;
+            hasNormalChoices = true;
+        }
+
+        for (int index = uiButtonIndex; index < choiceButtons.Length; index++)
+        {
+            choiceButtons[index].gameObject.SetActive(false);
         }
 
         choiceBubblePanel.SetActive(hasNormalChoices);
@@ -292,7 +387,16 @@ public class DialogueController : MonoBehaviour
 
     private void OnBubbleClicked(int index)
     {
-        if (choiceBubblePanel != null) choiceBubblePanel.SetActive(false);
+        if (story == null || index < 0 || index >= story.currentChoices.Count)
+        {
+            return;
+        }
+
+        if (choiceBubblePanel != null)
+        {
+            choiceBubblePanel.SetActive(false);
+        }
+
         float hesitationDuration = Time.realtimeSinceStartup - _choiceStartTime;
         string choiceText = story.currentChoices[index].text;
 
@@ -307,32 +411,43 @@ public class DialogueController : MonoBehaviour
 
     private void ParseTags(List<string> tags)
     {
-        if (tags == null) return;
+        if (tags == null)
+        {
+            return;
+        }
+
         foreach (string tag in tags)
         {
-            string[] split = tag.Split(':');
+            int separatorIndex = tag.IndexOf(':');
+            if (separatorIndex < 0)
+            {
+                continue;
+            }
 
-            if (split.Length < 2) continue;
-
-            string tagKey = split[0].Trim();
-            string tagValue = split[1].Trim();
+            string tagKey = tag.Substring(0, separatorIndex).Trim();
+            string tagValue = tag.Substring(separatorIndex + 1).Trim();
 
             if (tagKey == "speaker")
             {
-                txtSpeaker.text = tagValue;
+                if (txtSpeaker != null)
+                {
+                    txtSpeaker.text = tagValue;
+                }
             }
             else if (tagKey == "load_scene")
             {
-                Debug.Log($"【系统】Ink 请求：{tagValue}");
                 Time.timeScale = 1f;
-                if (GameSystem.Instance != null) GameSystem.Instance.SaveGame(0);
+                if (GameSystem.Instance != null)
+                {
+                    GameSystem.Instance.SaveGame(0);
+                }
+
                 UnityEngine.SceneManagement.SceneManager.LoadScene(tagValue);
             }
             else if (tagKey == "action")
             {
                 if (tagValue == "upload_data")
                 {
-                    Debug.Log("data uploading...");
                     if (TelemetryManager.Instance != null)
                     {
                         TelemetryManager.Instance.UploadDataToServer();
@@ -341,56 +456,37 @@ public class DialogueController : MonoBehaviour
                 else if (tagValue.StartsWith("meta_"))
                 {
                     string currentUser = PlayerPrefs.GetString("CurrentUser", "Guest");
-
                     PlayerPrefs.SetInt($"{currentUser}_{tagValue}", 1);
                     PlayerPrefs.Save();
-                    Debug.Log($"[meta] {tagValue} 永久记录到 {currentUser} ");
                 }
             }
-            else if (tagKey == "portrait")
+            else if (tagKey == "portrait" && ScenarioManager.Instance != null)
             {
-                if (ScenarioManager.Instance != null)
-                {
-                    ScenarioManager.Instance.ChangePortrait(tagValue);
-                }
+                ScenarioManager.Instance.ChangePortrait(tagValue);
             }
-            else if (tagKey == "show")
+            else if (tagKey == "show" && ScenarioManager.Instance != null)
             {
-                if (ScenarioManager.Instance != null)
-                {
-                    ScenarioManager.Instance.ToggleProp(tagValue, true);
-                }
+                ScenarioManager.Instance.ToggleProp(tagValue, true);
             }
-            else if (tagKey == "hide")
+            else if (tagKey == "hide" && ScenarioManager.Instance != null)
             {
-                if (ScenarioManager.Instance != null)
-                {
-                    ScenarioManager.Instance.ToggleProp(tagValue, false);
-                }
+                ScenarioManager.Instance.ToggleProp(tagValue, false);
             }
-            else if (tagKey == "bg")
+            else if (tagKey == "bg" && ScenarioManager.Instance != null)
             {
-                if (ScenarioManager.Instance != null)
-                {
-                    ScenarioManager.Instance.ChangeBG(tagValue);
-                }
+                ScenarioManager.Instance.ChangeBG(tagValue);
             }
-            else if (tagKey == "bgm")
+            else if (tagKey == "bgm" && ScenarioManager.Instance != null)
             {
-                if (ScenarioManager.Instance != null)
-                {
-                    ScenarioManager.Instance.ChangeBGM(tagValue);
-                }
+                ScenarioManager.Instance.ChangeBGM(tagValue);
             }
-            else if (tagKey == "sfx")
+            else if (tagKey == "sfx" && ScenarioManager.Instance != null)
             {
-                if (ScenarioManager.Instance != null)
-                {
-                    ScenarioManager.Instance.PlaySFX(tagValue);
-                }
+                ScenarioManager.Instance.PlaySFX(tagValue);
             }
         }
     }
+
     private IEnumerator SmoothTypeWriter(string text)
     {
         _isTyping = true;
@@ -403,39 +499,56 @@ public class DialogueController : MonoBehaviour
             txtBody.maxVisibleCharacters = 0;
         }
 
-        if (continueIcon != null) continueIcon.SetActive(false);
-
-        int totalChars = txtBody != null ? txtBody.textInfo.characterCount : text.Length;
-
-        float timer = 0f;
-        float charsPerSecond = 1f / typeSpeed;
-
-        while (txtBody != null && txtBody.maxVisibleCharacters < totalChars)
+        if (continueIcon != null)
         {
-            timer += Time.deltaTime; 
-            int targetChars = Mathf.FloorToInt(timer * charsPerSecond);
-            txtBody.maxVisibleCharacters = targetChars;
+            continueIcon.SetActive(false);
+        }
 
-            yield return null; 
+        int totalCharacters = txtBody != null ? txtBody.textInfo.characterCount : text.Length;
+        float visibleCharacterProgress = 0f;
+
+        while (txtBody != null && txtBody.maxVisibleCharacters < totalCharacters)
+        {
+            float delay = Mathf.Max(0.001f, SettingsService.TextDelay > 0f ? SettingsService.TextDelay : typeSpeed);
+            visibleCharacterProgress += Time.deltaTime / delay;
+            txtBody.maxVisibleCharacters = Mathf.Min(
+                Mathf.FloorToInt(visibleCharacterProgress),
+                totalCharacters);
+            yield return null;
         }
 
         _isTyping = false;
-        if (txtBody != null) txtBody.maxVisibleCharacters = 99999;
-        if (continueIcon != null) continueIcon.SetActive(true);
+        if (txtBody != null)
+        {
+            txtBody.maxVisibleCharacters = 99999;
+        }
+
+        if (continueIcon != null)
+        {
+            continueIcon.SetActive(true);
+        }
     }
 
     private void OnUserClick()
     {
         if (_isTyping)
         {
-            if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
+            if (_typingCoroutine != null)
+            {
+                StopCoroutine(_typingCoroutine);
+            }
+
             if (txtBody != null)
             {
                 txtBody.text = _currentFullText;
                 txtBody.maxVisibleCharacters = 99999;
             }
+
             _isTyping = false;
-            if (continueIcon != null) continueIcon.SetActive(true);
+            if (continueIcon != null)
+            {
+                continueIcon.SetActive(true);
+            }
         }
         else
         {
