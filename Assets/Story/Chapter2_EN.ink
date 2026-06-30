@@ -67,36 +67,36 @@ The other protects public institutions and future safety while leaving the prese
     #action: meta_robin_hood_allowed
     -> robin_hood_end
 
-* [Use the coin to decide]
+* [Flip the coin]
     #speaker: Ambrose
     Heads: seize and distribute the money. Tails: allow the convoy to continue.
     #speaker: The Judge
-    The coin gives both claims an equal chance, though equality of chance is not the same as equality of need or consequence.
+    The coin gives both claims an equal chance.
     -> robin_hood_coin_result
 
 // ------------------------------------------------------------
 
 === robin_hood_coin_result ===
 #speaker: Ambrose
-(The coin lands heads-up in the snow.)
+(The coin lands heads-up.)
 According to the rule I chose, Robin Hood should seize the convoy.
 
 #speaker: The Judge
 You may follow the procedure or reject it. Either choice will reveal what role the coin actually played.
 
-* [Follow the result and seize the convoy]
+* [Follow it, seize the convoy]
     #speaker: Ambrose
     I will follow the result. The funds will be distributed, and I accept that the bridge and road system may suffer later.
     #speaker: The Judge
-    You honour the impartial procedure and deliver immediate relief, while allowing chance to determine which community bears the future risk.
+    You honour the impartial procedure and deliver immediate relief.
     #action: meta_robin_hood_coin_seized
     -> robin_hood_end
 
-* [Reject the result and allow the convoy to continue]
+* [Reject it, allow the convoy to continue]
     #speaker: Ambrose
     I will not let the coin redirect public funds. The convoy will continue, and I accept the harm that delayed relief may cause.
     #speaker: The Judge
-    You override the procedure to preserve law and public planning, taking responsibility for the unmet need that remains.
+    You override the procedure to preserve law and public planning.
     #action: meta_robin_hood_coin_overridden
     -> robin_hood_end
 

@@ -10,44 +10,43 @@ The trolley cannot be stopped. Pulling the lever will redirect it; leaving the l
 What should be done?
 
 // ------------------------------------------------------------
-+ #id:Lever [Inspect the lever]
++ #id:Lever [the lever]
     #speaker: Ambrose
     The mechanism is simple: one movement changes who is placed in danger.
     Pulling it would make the redirection deliberate. Leaving it untouched would allow the existing course to continue.
     -> trolley_hub
 
-+ #id:TheFive [Observe the five workers]
++ #id:TheFive [the five workers]
     #speaker: Ambrose
     Five people are trapped on the main track. Each has the same immediate claim to survival as the person on the side track.
-    Their number matters, but it does not make any one of them more valuable as an individual.
     -> trolley_hub
 
-+ #id:TheOne [Observe the worker on the side track]
++ #id:TheOne [the worker on the side track]
     #speaker: Ambrose
     One person stands on the side track, currently outside the trolley's path.
     Diverting the trolley would place that person in danger in order to spare the five.
     -> trolley_hub
 
-+ #id:SilverCoin [Examine the coin in your pocket]
++ #id:SilverCoin [the coin]
     #speaker: Ambrose
-    A coin could choose without preference, but randomness would not remove my responsibility for deciding to use it.
+    Very normal.
     -> trolley_hub
 
-* [Pull the lever and divert the trolley]
+* [Pull the lever, divert the trolley]
     #speaker: Ambrose
     I will redirect it. One person will die, but five will otherwise die on the current track.
     #speaker: The Judge
     You intervene and reduce the number of deaths, while making the single worker's death a consequence of your action.
     -> end_dilemma
 
-* [Leave the lever untouched]
+* [Leave the lever]
     #speaker: Ambrose
     I will not redirect the trolley. The five remain in danger, but I will not place the worker on the side track in its path.
     #speaker: The Judge
     You preserve the existing course and avoid using one person as the means of saving the others, while allowing five preventable deaths.
     -> end_dilemma
 
-* [Use the coin to select between the two actions]
+* [Flip the coin]
     #speaker: Ambrose
     Heads: pull the lever. Tails: leave it untouched.
     #speaker: The Judge
@@ -64,25 +63,25 @@ Tails. According to the rule I chose, I should leave the lever untouched.
 #speaker: The Judge
 The result does not compel you. It only returns the decision in a form you agreed to follow.
 
-* [Follow the result and leave the lever untouched]
+* [Follow it, and leave the lever untouched]
     #speaker: Ambrose
     I chose the procedure before knowing the outcome. I will follow it, even though five people will die.
     #speaker: The Judge
-    You value consistency and impartial procedure over revising the decision in response to its consequence.
+    I see.
     -> end_dilemma
 
-* [Reject the result and pull the lever]
+* [Reject it, and pull the lever]
     #speaker: Ambrose
     I used chance to avoid favouring either side, but I am not willing to accept this outcome. I will pull the lever.
     #speaker: The Judge
-    You revise the procedure when confronted with its result, accepting direct responsibility for the final choice.
+    I see.
     -> end_dilemma
 
 // ------------------------------------------------------------
 
 === end_dilemma ===
 #speaker: The Judge
-The decision is made. Time resumes.
+The decision is made.
 
 #speaker: Ambrose
 (The sound of wheels and metal returns all at once.)
