@@ -1,7 +1,7 @@
 -> robin_hood_intro
 
 === robin_hood_intro ===
-#speaker: 신의 사자
+#speaker: The Judge
 #bgm: Dilemma
 혹독한 겨울로 인해 군 전역의 수확이 큰 피해를 입었습니다.
 세금 수송대가 은화 1,200마르크를 수도로 옮기고 있습니다. 대부분은 대지주에게서 걷었고, 나머지는 상인, 소작료, 시장 통행세에서 나왔습니다.
@@ -12,94 +12,94 @@
 보안관은 자금에 법적 용도가 정해져 있으며 예산 변경이 왕실의 처벌을 부를 수 있다는 이유로 전용을 거부했습니다.
 로빈 후드는 수송대를 습격해 돈을 나눠 줘야 할까요?
 
-#speaker: 앰브로즈
+#speaker: Ambrose
 한 선택은 정해진 용도에서 돈을 빼내 지금의 필요에 응답한다.
 다른 선택은 제도와 미래의 안전을 지키지만 현재의 위기를 충분히 돕지 못한다.
 -> robin_hood_hub
 
 === robin_hood_hub ===
-#speaker: 앰브로즈
+#speaker: Ambrose
 (같은 돈으로 두 요구를 모두 충족할 수는 없다. 각 선택에서 누가 대가를 치르는지 보자.)
 
 + #id:Convoy [세금 수송대를 살펴본다]
-    #speaker: 앰브로즈
+    #speaker: Ambrose
     이 돈은 군의 법에 따라 걷힌 것이다.
     손실을 감당할 수 있는 사람도 있지만, 작은 상인과 소작인 중에는 이미 감당하기 어려운 돈을 낸 이들도 있다.
     -> robin_hood_hub
 
 + #id:ReliefList [교구 구호 명단을 확인한다]
-    #speaker: 앰브로즈
+    #speaker: Ambrose
     명단에는 식량이 거의 남지 않은 150가구가 적혀 있다. 아이, 노인, 일할 수 없는 환자가 있는 가구도 많다.
     추산은 신뢰할 만하다. 하지만 지금 돈을 나눠 준다고 지속적인 구호 체계가 생기는 것은 아니다.
     -> robin_hood_hub
 
 + #id:BridgeLedger [다리와 경비대 장부를 확인한다]
-    #speaker: 앰브로즈
+    #speaker: Ambrose
     이 다리는 세 마을의 주요 통로다. 기술자들은 수리하지 않으면 다음 홍수 때 통행이 불가능해질 수 있다고 경고한다.
     경비대는 상인과 여행자를 보호하지만, 로빈 후드가 반대하는 세금 체계를 집행하는 역할도 한다.
     -> robin_hood_hub
 
 + #id:SheriffOrder [보안관의 거부 문서를 읽는다]
-    #speaker: 앰브로즈
+    #speaker: Ambrose
     보안관은 합법적인 예산을 따르고 있다. 돈을 전용하면 해임되거나 처벌받을 수 있다.
     그의 거부는 제도적 질서를 지키지만, 명단에 있는 가구를 제때 돕지는 못한다.
     -> robin_hood_hub
 
 + #id:SilverCoin [동전을 살펴본다]
-    #speaker: 앰브로즈
+    #speaker: Ambrose
     동전은 긴급 구호와 예정된 공공사업 사이에서 어느 쪽도 편들지 않고 선택할 수 있다.
     하지만 왜 진 쪽이 대가를 치러야 하는지는 설명하지 못한다.
     -> robin_hood_hub
 
 * [수송대를 습격해 돈을 나눠 준다]
-    #speaker: 앰브로즈
+    #speaker: Ambrose
     습격하겠다. 겨울의 위기는 지금 닥쳐 있고, 이 돈은 당장 심각한 피해를 막을 수 있다.
-    #speaker: 신의 사자
+    #speaker: The Judge
     당신은 법, 소유권, 미래 예산의 목적을 넘어 긴급한 필요를 충족했습니다. 가구들은 구호를 받지만, 다리와 경비대와 납세자들이 위험을 떠안습니다.
     #action: meta_robin_hood_seized
     -> robin_hood_end
 
 * [수송대를 그대로 보낸다]
-    #speaker: 앰브로즈
+    #speaker: Ambrose
     통과시키겠다. 이 돈은 공동 기반시설과 안전을 위해 걷혔다. 빼앗는다면 위기를 다른 공동체로 옮길 뿐이다.
-    #speaker: 신의 사자
+    #speaker: The Judge
     당신은 합법적 배분과 미래의 공공 이익을 지키고, 기존 구호가 일부 가구에는 너무 늦을 수 있음을 받아들였습니다.
     #action: meta_robin_hood_allowed
     -> robin_hood_end
 
 * [동전으로 결정한다]
-    #speaker: 앰브로즈
+    #speaker: Ambrose
     앞면이면 수송대를 습격해 나눈다. 뒷면이면 그대로 보낸다.
-    #speaker: 신의 사자
+    #speaker: The Judge
     동전은 양쪽에 같은 기회를 줍니다.
     -> robin_hood_coin_result
 
 === robin_hood_coin_result ===
-#speaker: 앰브로즈
+#speaker: Ambrose
 (동전이 앞면을 위로 한 채 떨어진다.)
 내가 선택한 규칙대로라면 로빈 후드는 수송대를 습격해야 한다.
 
-#speaker: 신의 사자
+#speaker: The Judge
 절차를 따를 수도 있고 거부할 수도 있습니다. 어느 쪽이든 동전이 실제로 어떤 역할을 했는지 드러날 것입니다.
 
 * [결과를 따르고 수송대를 습격한다]
-    #speaker: 앰브로즈
+    #speaker: Ambrose
     결과를 따르겠다. 돈은 분배될 것이다. 다리와 도로 체계가 나중에 피해를 볼 가능성도 받아들이겠다.
-    #speaker: 신의 사자
+    #speaker: The Judge
     당신은 공정한 절차를 지키고 눈앞의 구호를 제공했습니다.
     #action: meta_robin_hood_coin_seized
     -> robin_hood_end
 
 * [결과를 거부하고 수송대를 보낸다]
-    #speaker: 앰브로즈
+    #speaker: Ambrose
     동전이 공공 자금의 용도를 바꾸게 둘 수는 없다. 수송대는 계속 간다. 구호 지연이 낳을 피해도 받아들이겠다.
-    #speaker: 신의 사자
+    #speaker: The Judge
     당신은 절차를 뒤집고 법과 공공계획을 지켰습니다.
     #action: meta_robin_hood_coin_overridden
     -> robin_hood_end
 
 === robin_hood_end ===
-#speaker: 신의 사자
+#speaker: The Judge
 세 번째 결정이 기록되었습니다.
 
 #load_scene: Test_ending
