@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,20 +7,22 @@ public class ScenarioManager : MonoBehaviour
 {
     public static ScenarioManager Instance { get; private set; }
 
-    [Header("Portraits (Á¢»æ)")]
+    [Header("Portraits (ç«‹ç»˜)")]
     public Image portraitDisplay;
     public List<Sprite> portraitSprites;
 
-    [Header("Backgrounds (±³¾°)")]
+    [Header("Backgrounds (èƒŒæ™¯)")]
     public Image bgDisplay;
     public List<Sprite> bgSprites;
 
-    [Header("Stage Props (³¡¾°ÎïÆ·)")]
+    [Header("Stage Props (åœºæ™¯ç‰©å“)")]
     public List<GameObject> sceneProps;
 
-    [Header("Audio (ÉùÒô£©")] 
+    [Header("Audio (å£°éŸ³ï¼‰")]
     public List<AudioClip> bgmClips;
     public List<AudioClip> sfxClips;
+
+    private readonly HashSet<string> _missingSpeakerPortraits = new HashSet<string>();
 
     void Awake()
     {
@@ -30,27 +33,162 @@ public class ScenarioManager : MonoBehaviour
     public void ChangePortrait(string portraitName)
     {
         if (portraitDisplay == null) return;
-        if (string.IsNullOrEmpty(portraitName) || portraitName.ToLower() == "none")
+        if (string.IsNullOrEmpty(portraitName) || portraitName.ToLowerInvariant() == "none")
         {
             portraitDisplay.gameObject.SetActive(false);
             return;
         }
-        foreach (Sprite s in portraitSprites)
+
+        Sprite portrait = FindPortraitByName(portraitName);
+        if (portrait != null)
         {
-            if (s != null && s.name == portraitName)
+            ShowPortrait(portrait);
+            return;
+        }
+
+        Debug.LogWarning($"æ²¡åœ¨åˆ—è¡¨é‡Œæ‰¾åˆ°åä¸º '{portraitName}' çš„ç«‹ç»˜");
+    }
+
+    /// <summary>
+    /// Automatically resolves an Ink speaker name to a sprite that follows the
+    /// character-name_test convention. Text after the first colon is treated as
+    /// a speaker subtitle, e.g. "The Judge: Third Deliberation" -> Judge_test.
+    /// </summary>
+    public void ChangePortraitForSpeaker(string speakerName)
+    {
+        if (portraitDisplay == null || string.IsNullOrWhiteSpace(speakerName))
+        {
+            return;
+        }
+
+        string baseSpeakerName = speakerName;
+        int subtitleSeparator = baseSpeakerName.IndexOf(':');
+        if (subtitleSeparator >= 0)
+        {
+            baseSpeakerName = baseSpeakerName.Substring(0, subtitleSeparator);
+        }
+        baseSpeakerName = baseSpeakerName.Trim();
+
+        if (string.IsNullOrEmpty(baseSpeakerName))
+        {
+            return;
+        }
+
+        List<string> candidates = BuildSpeakerPortraitCandidates(baseSpeakerName);
+        foreach (string candidate in candidates)
+        {
+            Sprite portrait = FindPortraitByName(candidate);
+            if (portrait != null)
             {
-                portraitDisplay.sprite = s;
-                portraitDisplay.gameObject.SetActive(true);
+                ShowPortrait(portrait);
                 return;
             }
         }
-        Debug.LogWarning($"Ã»ÔÚÁĞ±íÀïÕÒµ½ÃûÎª '{portraitName}' µÄÁ¢»æ");
+
+        string missingKey = NormalizeAssetName(baseSpeakerName);
+        if (_missingSpeakerPortraits.Add(missingKey))
+        {
+            Debug.LogWarning(
+                $"[Portrait] No portrait found for speaker '{speakerName}'. " +
+                $"Expected one of: {string.Join(", ", candidates)}");
+        }
+    }
+
+    private List<string> BuildSpeakerPortraitCandidates(string speakerName)
+    {
+        string normalizedSpeaker = NormalizeAssetName(speakerName);
+        List<string> candidates = new List<string>();
+
+        switch (normalizedSpeaker)
+        {
+            case "thejudge":
+            case "judge":
+            case "ç¥ä½¿":
+                candidates.Add("Judge_test");
+                candidates.Add("TheJudge_test");
+                candidates.Add("Sera_test");
+                break;
+            case "sera":
+                candidates.Add("Sera_test");
+                candidates.Add("Judge_test");
+                break;
+            case "ambrose":
+            case "ä¸»è§’":
+                candidates.Add("Ambrose_test");
+                break;
+            case "adams":
+            case "äºšå½“æ–¯":
+                candidates.Add("Adams_test");
+                break;
+            case "kate":
+            case "å‡¯ç‰¹":
+                candidates.Add("Kate_test");
+                break;
+            case "miniel":
+            case "æ˜ä¼Šå°”":
+                candidates.Add("Miniel_test");
+                break;
+            case "rumins":
+            case "é™†æ˜æ–¯":
+                candidates.Add("Rumins_test");
+                break;
+            default:
+                candidates.Add(speakerName + "_test");
+                break;
+        }
+
+        candidates.Add(speakerName);
+        return candidates;
+    }
+
+    private Sprite FindPortraitByName(string portraitName)
+    {
+        if (portraitSprites == null || string.IsNullOrWhiteSpace(portraitName))
+        {
+            return null;
+        }
+
+        string normalizedTarget = NormalizeAssetName(portraitName);
+        foreach (Sprite sprite in portraitSprites)
+        {
+            if (sprite != null && NormalizeAssetName(sprite.name) == normalizedTarget)
+            {
+                return sprite;
+            }
+        }
+
+        return null;
+    }
+
+    private void ShowPortrait(Sprite portrait)
+    {
+        portraitDisplay.sprite = portrait;
+        portraitDisplay.gameObject.SetActive(true);
+    }
+
+    private static string NormalizeAssetName(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return string.Empty;
+        }
+
+        StringBuilder builder = new StringBuilder(value.Length);
+        foreach (char character in value)
+        {
+            if (char.IsLetterOrDigit(character) || character > 127)
+            {
+                builder.Append(char.ToLowerInvariant(character));
+            }
+        }
+
+        return builder.ToString();
     }
 
     public void ChangeBG(string bgName)
     {
         if (bgDisplay == null) return;
-        if (string.IsNullOrEmpty(bgName) || bgName.ToLower() == "none")
+        if (string.IsNullOrEmpty(bgName) || bgName.ToLowerInvariant() == "none")
         {
             bgDisplay.gameObject.SetActive(false);
             return;
@@ -64,7 +202,7 @@ public class ScenarioManager : MonoBehaviour
                 return;
             }
         }
-        Debug.LogWarning($"Ã»ÔÚÁĞ±íÀïÕÒµ½ÃûÎª '{bgName}' µÄ±³¾°");
+        Debug.LogWarning($"æ²¡åœ¨åˆ—è¡¨é‡Œæ‰¾åˆ°åä¸º '{bgName}' çš„èƒŒæ™¯");
     }
 
     public void PlaySFX(string sfxName)
@@ -79,8 +217,9 @@ public class ScenarioManager : MonoBehaviour
                 return;
             }
         }
-        Debug.LogWarning($"Ã»ÔÚÁĞ±íÀïÕÒµ½ÃûÎª '{sfxName}' ");
+        Debug.LogWarning($"æ²¡åœ¨åˆ—è¡¨é‡Œæ‰¾åˆ°åä¸º '{sfxName}' ");
     }
+
     public void ToggleProp(string propName, bool isVisible)
     {
         foreach (GameObject prop in sceneProps)
@@ -91,7 +230,7 @@ public class ScenarioManager : MonoBehaviour
                 return;
             }
         }
-        Debug.LogWarning($"Ã»ÔÚÁĞ±íÀïÕÒµ½ÃûÎª '{propName}' µÄ³¡¾°ÎïÆ·£¡");
+        Debug.LogWarning($"æ²¡åœ¨åˆ—è¡¨é‡Œæ‰¾åˆ°åä¸º '{propName}' çš„åœºæ™¯ç‰©å“ï¼");
     }
 
     public void ChangeBGM(string bgmName)
@@ -110,6 +249,6 @@ public class ScenarioManager : MonoBehaviour
                 return;
             }
         }
-        Debug.LogWarning($"Ã»ÔÚÁĞ±íÀïÕÒµ½ÃûÎª '{bgmName}' µÄÒôÆµÎÄ¼ş£¡");
+        Debug.LogWarning($"æ²¡åœ¨åˆ—è¡¨é‡Œæ‰¾åˆ°åä¸º '{bgmName}' çš„éŸ³é¢‘æ–‡ä»¶ï¼");
     }
 }
