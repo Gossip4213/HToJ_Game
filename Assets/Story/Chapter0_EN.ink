@@ -2,94 +2,90 @@
 
 === trolley_hub ===
 #speaker: The Judge
-Welcome to the intersection of morality and physics, Ambrose.
-Look down at the tracks. A runaway trolley is hurtling towards five innocent workers. You can pull the lever to steer it in another direction to one unsuspecting person.
-You stand by the lever. What is your justice?
+#bgm: Dilemma
+Ambrose, consider the tracks below.
+A runaway trolley is moving toward five workers on the main track. They cannot leave the track in time.
+Beside you is a lever that will divert the trolley onto a side track, where one worker is standing.
+The trolley cannot be stopped. Pulling the lever will redirect it; leaving the lever untouched will preserve its current course.
+What should be done?
 
-// ---------------- ----------------
-+ #id:Lever [Examine the heavy iron lever]
-#speaker: Ambrose
-It's cold and covered in rust. The physical mechanism of choice.
-Pulling it makes me a murderer; ignoring it makes me a coward.
--> trolley_hub
+// ------------------------------------------------------------
++ #id:Lever [Inspect the lever]
+    #speaker: Ambrose
+    The mechanism is simple: one movement changes who is placed in danger.
+    Pulling it would make the redirection deliberate. Leaving it untouched would allow the existing course to continue.
+    -> trolley_hub
 
 + #id:TheFive [Observe the five workers]
-#speaker: Ambrose
-They are panicking, screaming silently in this frozen anomaly.
-#speaker: The Judge
-Society dictates their combined utility is absolute. Do you feel the weight of their numbers?
--> trolley_hub
+    #speaker: Ambrose
+    Five people are trapped on the main track. Each has the same immediate claim to survival as the person on the side track.
+    Their number matters, but it does not make any one of them more valuable as an individual.
+    -> trolley_hub
 
-+ #id:TheOne [Look at the single person]
-#speaker: Ambrose
-He's completely unaware of the approaching doom. 
-It reminds me of a serf in the Holy Roman Empire—just collateral damage for someone else's grand strategy.
--> trolley_hub
++ #id:TheOne [Observe the worker on the side track]
+    #speaker: Ambrose
+    One person stands on the side track, currently outside the trolley's path.
+    Diverting the trolley would place that person in danger in order to spare the five.
+    -> trolley_hub
 
-+ #id:SilverCoin [Take out the coin in your pocket]
-#speaker: Ambrose
-A worn silver coin.
-In a universe devoid of inherent meaning, a coin toss is just as valid as a PhD dissertation on ethics.
--> trolley_hub
++ #id:SilverCoin [Examine the coin in your pocket]
+    #speaker: Ambrose
+    A coin could choose without preference, but randomness would not remove my responsibility for deciding to use it.
+    -> trolley_hub
 
+* [Pull the lever and divert the trolley]
+    #speaker: Ambrose
+    I will redirect it. One person will die, but five will otherwise die on the current track.
+    #speaker: The Judge
+    You intervene and reduce the number of deaths, while making the single worker's death a consequence of your action.
+    -> end_dilemma
 
-* [Pull the lever]
-#speaker: Ambrose
-The math is simple. Five lives outweigh one. It's basic utilitarianism.
-#speaker: The Judge
-Ah, cold, calculating, and terribly boring. 
--> end_dilemma
+* [Leave the lever untouched]
+    #speaker: Ambrose
+    I will not redirect the trolley. The five remain in danger, but I will not place the worker on the side track in its path.
+    #speaker: The Judge
+    You preserve the existing course and avoid using one person as the means of saving the others, while allowing five preventable deaths.
+    -> end_dilemma
 
-* [Do nothing]
-#speaker: Ambrose
-I refuse to be an active participant in murder. Let fate take its course.
-#speaker: The Judge
-Kant would applaud you, though the five people currently being crushed might disagree.
--> end_dilemma
+* [Use the coin to select between the two actions]
+    #speaker: Ambrose
+    Heads: pull the lever. Tails: leave it untouched.
+    #speaker: The Judge
+    The procedure is impartial, but choosing the procedure is still a moral decision.
+    -> coin_result
 
-* [Flip a coin]
-#speaker: Ambrose
-Heads or tails... Let chance decide the weight of human lives.
-#speaker: The Judge
-An existentialist cop-out, or perhaps the only true fairness in a chaotic world?
--> coin_result
-
-// ---------------- ----------------
+// ------------------------------------------------------------
 
 === coin_result ===
 #speaker: Ambrose
-(The coin flips in the frozen air, landing with a sharp clink against the rusty metal...)
-It's tails. 
-Meaning I must do nothing. The five workers will die.
+(The coin turns in the air and lands against the metal housing.)
+Tails. According to the rule I chose, I should leave the lever untouched.
 
 #speaker: The Judge
-The oracle of chance has spoken. Will you submit to your own absurd rules, or will your human hubris force you to intervene?
+The result does not compel you. It only returns the decision in a form you agreed to follow.
 
-* [Accept, Do nothing]
-#speaker: Ambrose
-I agreed to the terms. To change my mind now is to pretend my choice has inherent meaning. Let fate take them.
-#speaker: The Judge
-A frighteningly consistent nihilist. Let us see how you sleep tonight.
--> end_dilemma
+* [Follow the result and leave the lever untouched]
+    #speaker: Ambrose
+    I chose the procedure before knowing the outcome. I will follow it, even though five people will die.
+    #speaker: The Judge
+    You value consistency and impartial procedure over revising the decision in response to its consequence.
+    -> end_dilemma
 
-* [Pull the lever]
-#speaker: Ambrose
-No... I can't just stand here and watch them get crushed. To hell with the coin! I'm pulling the lever!
-#speaker: The Judge
-Fascinating. You sought the comfort of randomness to escape guilt, yet buckled under its actual weight. The ultimate human hypocrisy.
--> end_dilemma
+* [Reject the result and pull the lever]
+    #speaker: Ambrose
+    I used chance to avoid favouring either side, but I am not willing to accept this outcome. I will pull the lever.
+    #speaker: The Judge
+    You revise the procedure when confronted with its result, accepting direct responsibility for the final choice.
+    -> end_dilemma
 
-
-// ---------------- ----------------
+// ------------------------------------------------------------
 
 === end_dilemma ===
-
 #speaker: The Judge
-The gears of fate turn. Let time resume.
+The decision is made. Time resumes.
 
 #speaker: Ambrose
-(The deafening sound of metal grinding against metal fills the air...)
+(The sound of wheels and metal returns all at once.)
 
-// 触发 Unity 的场景跳转逻辑
 #load_scene: Chapter1_Test
 -> END
