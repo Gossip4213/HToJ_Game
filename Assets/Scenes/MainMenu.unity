@@ -9797,6 +9797,7 @@ MonoBehaviour:
   nativeLangDropdown: {fileID: 1065812586}
   multilingualToggle: {fileID: 95375952}
   warningText: {fileID: 1072276509}
+  gameLanguageDropdown: {fileID: 0}
   secondaryLangPanel: {fileID: 1748517843}
   secondaryLangToggles:
   - {fileID: 1965057147}
@@ -12522,8 +12523,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -288.28888, y: -631.8044}
-  m_SizeDelta: {x: -779.10986, y: -755.5916}
+  m_AnchoredPosition: {x: -306.4401, y: -631.8044}
+  m_SizeDelta: {x: -716.27, y: -755.5916}
   m_Pivot: {x: 0.32180014, y: 1.0602878}
 --- !u!114 &1072276509
 MonoBehaviour:
@@ -12612,7 +12613,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 5.533142, w: 0}
+  m_margin: {x: 1.9185181, y: 0, z: 5.533142, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

@@ -32,7 +32,7 @@ What should be done?
     Very normal.
     -> trolley_hub
 
-* [Pull the lever, divert the trolley]
+* [Pull the lever, divert trolley]
     #speaker: Ambrose
     I will redirect it. One person will die, but five will otherwise die on the current track.
     #speaker: The Judge
@@ -63,14 +63,14 @@ Tails. According to the rule I chose, I should leave the lever untouched.
 #speaker: The Judge
 The result does not compel you. It only returns the decision in a form you agreed to follow.
 
-* [Follow it, and leave the lever untouched]
+* [Follow it, leave the lever untouched]
     #speaker: Ambrose
     I chose the procedure before knowing the outcome. I will follow it, even though five people will die.
     #speaker: The Judge
     I see.
     -> end_dilemma
 
-* [Reject it, and pull the lever]
+* [Reject it, pull the lever]
     #speaker: Ambrose
     I used chance to avoid favouring either side, but I am not willing to accept this outcome. I will pull the lever.
     #speaker: The Judge

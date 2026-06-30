@@ -5485,7 +5485,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectID: SheriffOrder
   hoverThought: Sheriff Order
-  highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 0}
+  highlightColor: {r: 0.9, g: 0.9, b: 0.9, a: 0.19607843}
   hoverScale: 1.05
 --- !u!114 &1114177539
 MonoBehaviour:
@@ -6470,7 +6470,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 7547944075769385133, guid: 582b0c3456448c44a80239b60fd171fb, type: 3}
+  m_Sprite: {fileID: 7547944075769385133, guid: afd11905cda19224898784912e7f3dc3, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

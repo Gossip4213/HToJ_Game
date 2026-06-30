@@ -53,7 +53,7 @@ The other protects public institutions and future safety while leaving the prese
     It could not explain why the losing claim should bear the cost.
     -> robin_hood_hub
 
-* [Seize the convoy and distribute the money]
+* [Seize the convoy, distribute the money]
     #speaker: Ambrose
     I will seize it. The winter emergency is immediate, and the money can prevent serious harm now.
     #speaker: The Judge
@@ -94,7 +94,7 @@ You may follow the procedure or reject it. Either choice will reveal what role t
     #action: meta_robin_hood_coin_seized
     -> robin_hood_end
 
-* [Reject it, allow the convoy to continue]
+* [Reject it, let convoy continue]
     #speaker: Ambrose
     I will not let the coin redirect public funds. The convoy will continue, and I accept the harm that delayed relief may cause.
     #speaker: The Judge
