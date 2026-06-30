@@ -121,15 +121,7 @@ public class MainMenuController : MonoBehaviour
 
         if (!string.IsNullOrWhiteSpace(profile.lockedGameLanguage))
         {
-            PlayerPrefs.SetString("SelectedLanguage", profile.lockedGameLanguage);
-            PlayerPrefs.Save();
-
-            if (LocalizationManager.Instance != null)
-            {
-                LocalizationManager.Instance.ChangeLanguage(profile.lockedGameLanguage);
-            }
-
-            SyncLanguageDropdown(profile.lockedGameLanguage);
+            ApplyLanguage(profile.lockedGameLanguage, syncDropdown: true);
         }
 
         if (GameSystem.Instance != null)
@@ -427,12 +419,54 @@ public class MainMenuController : MonoBehaviour
     public void OnLanguageChanged(int index)
     {
         string code = LanguageIndexToCode(index);
-        PlayerPrefs.SetString("SelectedLanguage", code);
+        string currentProfileId = SubjectProfileService.GetCurrentProfileId();
+        SubjectProfileData currentProfile = null;
+
+        if (!string.IsNullOrWhiteSpace(currentProfileId))
+        {
+            currentProfile = SubjectProfileService.LoadProfile(currentProfileId, createIfMissing: false);
+            if (currentProfile != null)
+            {
+                currentProfile.lockedGameLanguage = code;
+                if (!SubjectProfileService.SaveProfile(currentProfile))
+                {
+                    Debug.LogError($"[SubjectProfile] Could not save game language for {currentProfileId}.");
+                }
+            }
+        }
+
+        ApplyLanguage(code, syncDropdown: false);
+
+        if (TelemetryManager.Instance != null && currentProfile != null)
+        {
+            TelemetryManager.Instance.UpdateSubjectProfile(currentProfile);
+            TelemetryManager.Instance.LogEvent("profile_language_changed", code);
+        }
+
+        if (string.IsNullOrWhiteSpace(currentProfileId))
+        {
+            Debug.Log($"[Language] Default language for the next subject set to {code}.");
+        }
+        else
+        {
+            Debug.Log($"[Language] {currentProfileId} game language set to {code}.");
+        }
+    }
+
+    private void ApplyLanguage(string languageCode, bool syncDropdown)
+    {
+        string normalizedCode = NormalizeLanguageCode(languageCode);
+        PlayerPrefs.SetString("SelectedLanguage", normalizedCode);
         PlayerPrefs.Save();
 
         if (LocalizationManager.Instance != null)
         {
-            LocalizationManager.Instance.ChangeLanguage(code);
+            LocalizationManager.Instance.ChangeLanguage(normalizedCode);
+        }
+
+        if (syncDropdown)
+        {
+            SyncLanguageDropdown(normalizedCode);
         }
     }
 
@@ -460,12 +494,41 @@ public class MainMenuController : MonoBehaviour
 
     private static int LanguageCodeToIndex(string code)
     {
-        switch (code)
+        switch (NormalizeLanguageCode(code))
         {
             case "ZH_CN": return 1;
             case "JP": return 2;
             case "KR": return 3;
             default: return 0;
+        }
+    }
+
+    private static string NormalizeLanguageCode(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return "EN";
+        }
+
+        switch (code.Trim().ToUpperInvariant())
+        {
+            case "ZH":
+            case "ZH-CN":
+            case "ZH_CN":
+            case "CHINESE":
+                return "ZH_CN";
+            case "JA":
+            case "JA-JP":
+            case "JAPANESE":
+            case "JP":
+                return "JP";
+            case "KO":
+            case "KO-KR":
+            case "KOREAN":
+            case "KR":
+                return "KR";
+            default:
+                return "EN";
         }
     }
 
