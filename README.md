@@ -144,11 +144,6 @@ GameSystem / SubjectProfileService / TelemetryManager
 
 <img width="100%" alt="Save and load interface" src="https://github.com/user-attachments/assets/049b01ae-5734-4e5e-942e-126928b2d994" />
 
-### Current protagonist portrait asset
-
-<div align="center">
-  <img width="42%" alt="Ambrose portrait" src="Assets/Main/Art/Characters/Ambrose/Ambrose_test.png" />
-</div>
 
 ## Opening the Project
 
