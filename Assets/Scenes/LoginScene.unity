@@ -1826,7 +1826,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097425a6b87fb4048bda53cec520c363, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverEndpoint: https://webhook.site/97b1f492-16e6-48a5-92dd-b264cd0ed38a
+  googleFormUrl: https://docs.google.com/forms/d/e/1FAIpQLSe4wSGCznH3u_waDeuFe1BDzT7xCQmn_iEFwce0y2C7Ql08Ww/viewform?usp=dialog
+  entryID_DeviceID: entry.1219463742
+  entryID_SubjectID: entry.456655523
+  entryID_Timestamp: entry.591917006
+  entryID_FullData: entry.1734290061
 --- !u!4 &432939253
 Transform:
   m_ObjectHideFlags: 0
@@ -1951,9 +1955,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   panelMenu: {fileID: 0}
   panelSettings: {fileID: 0}
+  panelCalibration: {fileID: 0}
   btnContinue: {fileID: 0}
   langDropdown: {fileID: 0}
   resDropdown: {fileID: 0}
+  profileDropdown: {fileID: 0}
   windowedToggle: {fileID: 0}
   skipUnreadToggle: {fileID: 0}
   musicSlider: {fileID: 0}
@@ -1963,7 +1969,7 @@ MonoBehaviour:
   speedPreviewText: {fileID: 0}
   sizePreviewText: {fileID: 0}
   saveLoadMenu: {fileID: 0}
-  panelCalibration: {fileID: 0}
+  calibrationController: {fileID: 0}
 --- !u!114 &460758328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4240,6 +4246,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentSave:
+    schemaVersion: 1
+    gameVersion: 
     playerName: Observer
     languageCode: ZH_CN
     bgmVolume: 1
@@ -4249,6 +4257,7 @@ MonoBehaviour:
     saveTime: 
     inkStoryState: 
     currentChapterIndex: 0
+    choicesHistory: []
   isLoadingFromSave: 0
   bgmSource: {fileID: 1456320253}
   sfxSource: {fileID: 1097654523}
@@ -6085,7 +6094,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Ver 0.1 | Created by Gossip4213
+  m_text: Ver 0.1.0 | Created by Gossip4213
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e588b4ccd72391148b7f013ff8f9bf69, type: 2}
   m_sharedMaterial: {fileID: -1139841743258800390, guid: e588b4ccd72391148b7f013ff8f9bf69, type: 2}

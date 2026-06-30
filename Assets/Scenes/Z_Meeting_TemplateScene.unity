@@ -10391,16 +10391,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d8fabee3ce06804fa0cef2fca5c5122, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  txtBody: {fileID: 924119130}
-  txtSpeaker: {fileID: 1937512042}
-  choiceContainer: {fileID: 1214669232}
-  buttonPrefab: {fileID: 4942265288361120524, guid: 6b607d47e8af42a49876c27603f25e7f, type: 3}
-  iconSera: {fileID: 0}
-  iconKate: {fileID: 0}
-  iconAdams: {fileID: 0}
-  iconMiniel: {fileID: 0}
-  iconRumins: {fileID: 0}
-  testCase: {fileID: 11400000, guid: 5b0dca1c72541da4a91351c34bf99832, type: 2}
+  portraitDisplay: {fileID: 0}
+  portraitSprites: []
+  bgDisplay: {fileID: 0}
+  bgSprites: []
+  sceneProps: []
+  bgmClips: []
+  sfxClips: []
 --- !u!4 &1834817446
 Transform:
   m_ObjectHideFlags: 0
@@ -10451,6 +10448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3af2a47b58ffbb24e902b3aaecd1c2bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sceneMusic: {fileID: 0}
 --- !u!82 &1834817449
 AudioSource:
   m_ObjectHideFlags: 0
@@ -11828,6 +11826,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3af2a47b58ffbb24e902b3aaecd1c2bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sceneMusic: {fileID: 0}
 --- !u!82 &1968938992
 AudioSource:
   m_ObjectHideFlags: 0
@@ -12033,7 +12032,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097425a6b87fb4048bda53cec520c363, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverEndpoint: https://webhook.site/97b1f492-16e6-48a5-92dd-b264cd0ed38a
+  googleFormUrl: https://docs.google.com/forms/d/e/1FAIpQLSe4wSGCznH3u_waDeuFe1BDzT7xCQmn_iEFwce0y2C7Ql08Ww/viewform?usp=dialog
+  entryID_DeviceID: entry.1219463742
+  entryID_SubjectID: entry.456655523
+  entryID_Timestamp: entry.591917006
+  entryID_FullData: entry.1734290061
 --- !u!4 &1998127039
 Transform:
   m_ObjectHideFlags: 0
