@@ -1,4 +1,4 @@
--> robin_hood_intro
+// Included by Chapter1_EN.ink as the third playable prototype chapter.
 
 === robin_hood_intro ===
 #speaker: The Judge: Third Deliberation
