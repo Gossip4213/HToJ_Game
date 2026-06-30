@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 6653086e58759ea4d9b2bea44f5a8e3b
+guid: 582b0c3456448c44a80239b60fd171fb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5158294962618580581
-    second: coin 1_0
+      213: 7547944075769385133
+    second: robin_hood_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: coin 1_0
+      name: robin_hood_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1254
-        height: 1254
+        width: 1672
+        height: 941
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b91ce62bf0e0a68b0800000000000000
-      internalID: -5158294962618580581
+      spriteID: da09fbc652fafb860800000000000000
+      internalID: 7547944075769385133
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      coin 1_0: -5158294962618580581
+      robin_hood_0: 7547944075769385133
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
