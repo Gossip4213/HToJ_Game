@@ -29,12 +29,26 @@ public class DialogueController : MonoBehaviour
     public float typeSpeed = 0.05f;
 
     private bool _isTyping;
+    private bool _sceneInteractionEnabled;
+    private bool _hoverThoughtVisible;
     private string _currentFullText = string.Empty;
+    private string _currentSpeakerName = string.Empty;
     private Coroutine _typingCoroutine;
     private float _choiceStartTime;
     private float _baseSpeakerFontSize;
     private float _baseBodyFontSize;
     private InkCommandRouter _commandRouter;
+
+    public bool CanInteractWithSceneObjects
+    {
+        get
+        {
+            return _sceneInteractionEnabled
+                && !_isTyping
+                && story != null
+                && story.currentChoices.Count > 0;
+        }
+    }
 
     void Awake()
     {
@@ -58,6 +72,7 @@ public class DialogueController : MonoBehaviour
             continueIcon.SetActive(false);
         }
 
+        SetSceneInteractionEnabled(false);
         ApplyTextSettings();
         StartStory();
     }
@@ -90,6 +105,8 @@ public class DialogueController : MonoBehaviour
 
     void OnDisable()
     {
+        SetSceneInteractionEnabled(false);
+
         if (LocalizationManager.Instance != null)
         {
             LocalizationManager.Instance.OnLanguageChanged -= UpdateFonts;
@@ -142,19 +159,27 @@ public class DialogueController : MonoBehaviour
 
     private void SetSpeaker(string speakerName)
     {
-        if (txtSpeaker != null)
+        _currentSpeakerName = speakerName ?? string.Empty;
+
+        if (!_hoverThoughtVisible && txtSpeaker != null)
         {
-            txtSpeaker.text = speakerName;
+            txtSpeaker.text = _currentSpeakerName;
+        }
+
+        if (ScenarioManager.Instance != null)
+        {
+            ScenarioManager.Instance.ChangePortraitForSpeaker(_currentSpeakerName);
         }
     }
 
     public void NotifyHoverUI(string thought)
     {
-        _isTyping = false;
-        if (_typingCoroutine != null)
+        if (!CanInteractWithSceneObjects)
         {
-            StopCoroutine(_typingCoroutine);
+            return;
         }
+
+        _hoverThoughtVisible = true;
 
         if (txtBody != null)
         {
@@ -170,16 +195,28 @@ public class DialogueController : MonoBehaviour
 
     public void NotifyExitUI()
     {
+        if (!_hoverThoughtVisible)
+        {
+            return;
+        }
+
+        _hoverThoughtVisible = false;
+
         if (!_isTyping && txtBody != null)
         {
             txtBody.text = _currentFullText;
             txtBody.maxVisibleCharacters = 99999;
         }
+
+        if (txtSpeaker != null)
+        {
+            txtSpeaker.text = _currentSpeakerName;
+        }
     }
 
     public void SelectThisObject(string id)
     {
-        if (story == null || story.currentChoices.Count == 0)
+        if (!CanInteractWithSceneObjects || string.IsNullOrWhiteSpace(id))
         {
             return;
         }
@@ -208,8 +245,9 @@ public class DialogueController : MonoBehaviour
                     TelemetryManager.Instance.LogEvent("investigate_object", id, hesitationDuration);
                 }
 
-                story.ChooseChoiceIndex(index);
+                SetSceneInteractionEnabled(false);
                 NotifyExitUI();
+                story.ChooseChoiceIndex(index);
                 DisplayNextLine();
                 return;
             }
@@ -218,6 +256,7 @@ public class DialogueController : MonoBehaviour
 
     public void StartStory()
     {
+        SetSceneInteractionEnabled(false);
         LoadStoryByLanguage();
         DisplayNextLine();
     }
@@ -287,10 +326,14 @@ public class DialogueController : MonoBehaviour
 
     public void DisplayNextLine()
     {
+        SetSceneInteractionEnabled(false);
+
         if (story == null)
         {
             return;
         }
+
+        HideChoiceBubbles();
 
         if (story.canContinue)
         {
@@ -312,23 +355,7 @@ public class DialogueController : MonoBehaviour
         }
         else if (story.currentChoices.Count > 0)
         {
-            bool hasInvestigation = false;
-
-            foreach (Choice choice in story.currentChoices)
-            {
-                if (choice.tags == null)
-                {
-                    continue;
-                }
-
-                foreach (string tag in choice.tags)
-                {
-                    if (tag.StartsWith("id:"))
-                    {
-                        hasInvestigation = true;
-                    }
-                }
-            }
+            bool hasInvestigation = HasInvestigationChoices();
 
             if (hasInvestigation)
             {
@@ -337,7 +364,45 @@ public class DialogueController : MonoBehaviour
 
             _choiceStartTime = Time.realtimeSinceStartup;
             ShowChoiceBubbles();
+            SetSceneInteractionEnabled(hasInvestigation);
         }
+    }
+
+    private bool HasInvestigationChoices()
+    {
+        if (story == null)
+        {
+            return false;
+        }
+
+        foreach (Choice choice in story.currentChoices)
+        {
+            if (IsInvestigationChoice(choice))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsInvestigationChoice(Choice choice)
+    {
+        if (choice == null || choice.tags == null)
+        {
+            return false;
+        }
+
+        foreach (string tag in choice.tags)
+        {
+            if (!string.IsNullOrWhiteSpace(tag)
+                && tag.TrimStart().StartsWith("id:"))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void ShowChoiceBubbles()
@@ -352,21 +417,9 @@ public class DialogueController : MonoBehaviour
 
         for (int choiceIndex = 0; choiceIndex < story.currentChoices.Count; choiceIndex++)
         {
-            bool isInvestigation = false;
             Choice choice = story.currentChoices[choiceIndex];
 
-            if (choice.tags != null)
-            {
-                foreach (string tag in choice.tags)
-                {
-                    if (tag.StartsWith("id:"))
-                    {
-                        isInvestigation = true;
-                    }
-                }
-            }
-
-            if (isInvestigation || uiButtonIndex >= choiceButtons.Length)
+            if (IsInvestigationChoice(choice) || uiButtonIndex >= choiceButtons.Length)
             {
                 continue;
             }
@@ -396,6 +449,14 @@ public class DialogueController : MonoBehaviour
         choiceBubblePanel.SetActive(hasNormalChoices);
     }
 
+    private void HideChoiceBubbles()
+    {
+        if (choiceBubblePanel != null)
+        {
+            choiceBubblePanel.SetActive(false);
+        }
+    }
+
     private void OnBubbleClicked(int index)
     {
         if (story == null || index < 0 || index >= story.currentChoices.Count)
@@ -403,10 +464,8 @@ public class DialogueController : MonoBehaviour
             return;
         }
 
-        if (choiceBubblePanel != null)
-        {
-            choiceBubblePanel.SetActive(false);
-        }
+        SetSceneInteractionEnabled(false);
+        HideChoiceBubbles();
 
         float hesitationDuration = Time.realtimeSinceStartup - _choiceStartTime;
         string choiceText = story.currentChoices[index].text;
@@ -432,6 +491,7 @@ public class DialogueController : MonoBehaviour
 
     private IEnumerator SmoothTypeWriter(string text)
     {
+        SetSceneInteractionEnabled(false);
         _isTyping = true;
         _currentFullText = text;
 
@@ -469,6 +529,16 @@ public class DialogueController : MonoBehaviour
         if (continueIcon != null)
         {
             continueIcon.SetActive(true);
+        }
+    }
+
+    private void SetSceneInteractionEnabled(bool enabled)
+    {
+        _sceneInteractionEnabled = enabled;
+
+        if (!enabled)
+        {
+            NotifyExitUI();
         }
     }
 
