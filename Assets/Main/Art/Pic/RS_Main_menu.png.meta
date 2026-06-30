@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5e310ee0c7d189243905f0aaed34524c
+guid: 05048ac2815fb124a972e9c5921ecd1f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7612868837134476935
-    second: Trolley_0
+      213: -5521903831830422587
+    second: RS_Main_menu_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Trolley_0
+      name: RS_Main_menu_0
       rect:
         serializedVersion: 2
         x: 0
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 97955f89028a95690800000000000000
-      internalID: -7612868837134476935
+      spriteID: 5cb11e3a8b14e53b0800000000000000
+      internalID: -5521903831830422587
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Trolley_0: -7612868837134476935
+      RS_Main_menu_0: -5521903831830422587
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
