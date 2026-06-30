@@ -29,27 +29,29 @@ public class MainMenuController : MonoBehaviour
     public SaveLoadMenuController saveLoadMenu;
     public CalibrationUIController calibrationController;
 
-    private Resolution[] resolutions;
     public static System.Action<float> OnFontSizeChanged;
+
     private Coroutine _typingCoroutine;
-    private string _previewContent = "Hmm... is it heads or tails this time? I am not sure....";
+    private readonly string _previewContent = "Hmm... is it heads or tails this time? I am not sure....";
 
     void Start()
     {
+        SubjectProfileService.EnsureLegacyProfiles();
         InitSettingsUI();
         InitProfileSystem();
 
         if (langDropdown != null)
         {
+            langDropdown.onValueChanged.RemoveListener(OnLanguageChanged);
             langDropdown.onValueChanged.AddListener(OnLanguageChanged);
         }
 
+        SettingsService.ApplyRuntimeSettings();
         CheckContinueButton();
     }
 
-    void InitProfileSystem()
+    private void InitProfileSystem()
     {
-        SubjectProfileService.EnsureLegacyProfiles();
         RefreshProfileDropdown();
 
         if (profileDropdown != null)
@@ -60,15 +62,15 @@ public class MainMenuController : MonoBehaviour
 
         if (!SubjectProfileService.HasAnyActiveProfile())
         {
-            ShowCalibrationPanel(editExisting: false, profileCreationRequired: true);
+            ShowCalibrationPanel(false, true);
             return;
         }
 
         ShowMenu();
-        SyncRuntimeToCurrentProfile(logSwitch: false);
+        SyncRuntimeToCurrentProfile(false);
     }
 
-    void RefreshProfileDropdown()
+    private void RefreshProfileDropdown()
     {
         if (profileDropdown == null)
         {
@@ -103,7 +105,7 @@ public class MainMenuController : MonoBehaviour
             return;
         }
 
-        SyncRuntimeToCurrentProfile(logSwitch: true);
+        SyncRuntimeToCurrentProfile(true);
         CheckContinueButton();
         Debug.Log($"[SubjectProfile] Current subject: {selectedProfile}");
     }
@@ -111,7 +113,7 @@ public class MainMenuController : MonoBehaviour
     private void SyncRuntimeToCurrentProfile(bool logSwitch)
     {
         string currentProfileId = SubjectProfileService.GetCurrentProfileId();
-        SubjectProfileData profile = SubjectProfileService.LoadProfile(currentProfileId, createIfMissing: true);
+        SubjectProfileData profile = SubjectProfileService.LoadProfile(currentProfileId, true);
         if (profile == null)
         {
             return;
@@ -126,6 +128,8 @@ public class MainMenuController : MonoBehaviour
             {
                 LocalizationManager.Instance.ChangeLanguage(profile.lockedGameLanguage);
             }
+
+            SyncLanguageDropdown(profile.lockedGameLanguage);
         }
 
         if (GameSystem.Instance != null)
@@ -146,18 +150,18 @@ public class MainMenuController : MonoBehaviour
 
     public void OnBtnShowCalibrationClick()
     {
-        ShowCalibrationPanel(editExisting: false, profileCreationRequired: false);
+        ShowCalibrationPanel(false, false);
     }
 
     public void OnBtnEditCurrentProfileClick()
     {
         if (!SubjectProfileService.HasAnyActiveProfile())
         {
-            ShowCalibrationPanel(editExisting: false, profileCreationRequired: true);
+            ShowCalibrationPanel(false, true);
             return;
         }
 
-        ShowCalibrationPanel(editExisting: true, profileCreationRequired: false);
+        ShowCalibrationPanel(true, false);
     }
 
     private void ShowCalibrationPanel(bool editExisting, bool profileCreationRequired)
@@ -202,7 +206,7 @@ public class MainMenuController : MonoBehaviour
     {
         SubjectProfileService.SetCurrentProfile(subjectId);
         RefreshProfileDropdown();
-        SyncRuntimeToCurrentProfile(logSwitch: false);
+        SyncRuntimeToCurrentProfile(false);
         ShowMenu();
         CheckContinueButton();
     }
@@ -212,7 +216,7 @@ public class MainMenuController : MonoBehaviour
         string currentProfile = SubjectProfileService.GetCurrentProfileId();
         if (string.IsNullOrWhiteSpace(currentProfile))
         {
-            ShowCalibrationPanel(editExisting: false, profileCreationRequired: true);
+            ShowCalibrationPanel(false, true);
             return;
         }
 
@@ -232,7 +236,7 @@ public class MainMenuController : MonoBehaviour
         if (panelCalibration != null) panelCalibration.SetActive(false);
     }
 
-    void CheckContinueButton()
+    private void CheckContinueButton()
     {
         bool hasSave = GameSystem.Instance != null && GameSystem.Instance.HasAnySaveFile();
         if (btnContinue == null)
@@ -250,11 +254,15 @@ public class MainMenuController : MonoBehaviour
 
     public void OnBtnContinueClick()
     {
-        if (saveLoadMenu != null) saveLoadMenu.ShowMenu(false);
+        if (saveLoadMenu != null)
+        {
+            saveLoadMenu.ShowMenu(false);
+        }
     }
 
     public void OnBtnSettingsClick()
     {
+        RefreshSettingsControls();
         if (panelMenu != null) panelMenu.SetActive(false);
         if (panelSettings != null) panelSettings.SetActive(true);
         if (panelCalibration != null) panelCalibration.SetActive(false);
@@ -267,7 +275,9 @@ public class MainMenuController : MonoBehaviour
 
     public void OnBtnQuitClick()
     {
-        Debug.Log("exiting.....");
+        PlayerPrefs.Save();
+        Debug.Log("Exiting...");
+
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -275,62 +285,55 @@ public class MainMenuController : MonoBehaviour
 #endif
     }
 
-    void InitSettingsUI()
+    private void InitSettingsUI()
     {
-        Vector2Int[] targetRes = new Vector2Int[]
-        {
-            new Vector2Int(3840, 2160),
-            new Vector2Int(2560, 1440),
-            new Vector2Int(1920, 1080),
-            new Vector2Int(1600, 900),
-            new Vector2Int(1280, 720)
-        };
-
         if (resDropdown != null)
         {
             resDropdown.ClearOptions();
             List<string> options = new List<string>();
-            int currentResIndex = 2;
-            List<Resolution> customResList = new List<Resolution>();
-
-            for (int i = 0; i < targetRes.Length; i++)
+            foreach (Vector2Int resolution in SettingsService.SupportedResolutions)
             {
-                options.Add(targetRes[i].x + " x " + targetRes[i].y);
-                Resolution r = new Resolution();
-                r.width = targetRes[i].x;
-                r.height = targetRes[i].y;
-                customResList.Add(r);
-                if (Screen.width == targetRes[i].x && Screen.height == targetRes[i].y)
-                {
-                    currentResIndex = i;
-                }
+                options.Add(resolution.x + " x " + resolution.y);
             }
-            resolutions = customResList.ToArray();
+
             resDropdown.AddOptions(options);
-            resDropdown.value = currentResIndex;
+        }
+
+        RefreshSettingsControls();
+        SyncLanguageDropdown(PlayerPrefs.GetString("SelectedLanguage", "EN"));
+    }
+
+    private void RefreshSettingsControls()
+    {
+        if (resDropdown != null)
+        {
+            resDropdown.SetValueWithoutNotify(SettingsService.FindCurrentResolutionIndex());
             resDropdown.RefreshShownValue();
         }
 
-        if (windowedToggle != null) windowedToggle.isOn = !Screen.fullScreen;
-        if (musicSlider != null)
+        if (windowedToggle != null)
         {
-            float savedVol = PlayerPrefs.GetFloat("MusicVol", 0.75f);
-            musicSlider.value = savedVol;
-            if (GameSystem.Instance != null)
-            {
-                GameSystem.Instance.SetMusicVolume(savedVol);
-            }
+            windowedToggle.SetIsOnWithoutNotify(!Screen.fullScreen);
         }
 
-        if (sfxSlider != null) sfxSlider.value = PlayerPrefs.GetFloat("SFXVol", 0.75f);
+        if (musicSlider != null)
+        {
+            musicSlider.SetValueWithoutNotify(SettingsService.MusicVolume);
+        }
+
+        if (sfxSlider != null)
+        {
+            sfxSlider.SetValueWithoutNotify(SettingsService.SfxVolume);
+        }
+
         if (textSpeedSlider != null)
         {
-            int savedLevel = PlayerPrefs.GetInt("TextSpeedLevel", 1);
-            textSpeedSlider.value = savedLevel;
+            textSpeedSlider.SetValueWithoutNotify(SettingsService.TextSpeedLevel);
         }
+
         if (skipUnreadToggle != null)
         {
-            skipUnreadToggle.isOn = PlayerPrefs.GetInt("SkipUnread", 0) == 1;
+            skipUnreadToggle.SetIsOnWithoutNotify(SettingsService.SkipUnread);
         }
 
         if (fontSizeSlider != null)
@@ -338,132 +341,92 @@ public class MainMenuController : MonoBehaviour
             fontSizeSlider.minValue = 0;
             fontSizeSlider.maxValue = 2;
             fontSizeSlider.wholeNumbers = true;
-            fontSizeSlider.value = PlayerPrefs.GetInt("FontSizeLevel", 1);
+            fontSizeSlider.SetValueWithoutNotify(SettingsService.FontSizeLevel);
         }
+
+        UpdateFontPreview(SettingsService.FontScale);
     }
 
     public void SetResolution(int index)
     {
-        if (resolutions == null || index < 0 || index >= resolutions.Length) return;
-        Resolution res = resolutions[index];
-        Screen.SetResolution(res.width, res.height, Screen.fullScreen);
+        SettingsService.SetResolution(index);
     }
 
     public void SetWindowed(bool isWindowed)
     {
-        Screen.fullScreenMode = isWindowed ? FullScreenMode.Windowed : FullScreenMode.FullScreenWindow;
-        Debug.Log(isWindowed ? "Windowed" : "Full screen");
+        SettingsService.SetWindowed(isWindowed);
     }
 
-    public void SetMusicVolume(float val)
+    public void SetMusicVolume(float value)
     {
-        PlayerPrefs.SetFloat("MusicVol", val);
-        if (GameSystem.Instance != null)
+        SettingsService.SetMusicVolume(value);
+    }
+
+    public void SetSFXVolume(float value)
+    {
+        SettingsService.SetSfxVolume(value);
+    }
+
+    public void SetTextSpeed(float value)
+    {
+        float delay = SettingsService.SetTextSpeedLevel(value);
+        StartSpeedPreview(delay);
+    }
+
+    private void StartSpeedPreview(float delay)
+    {
+        if (speedPreviewText == null)
         {
-            GameSystem.Instance.SetMusicVolume(val);
-        }
-    }
-
-    public void SetSFXVolume(float val)
-    {
-        PlayerPrefs.SetFloat("SFXVol", val);
-        if (GameSystem.Instance != null) GameSystem.Instance.SetSFXVolume(val);
-    }
-
-    public void SetTextSpeed(float val)
-    {
-        int level = Mathf.RoundToInt(val);
-        float charDelay = 0.05f;
-
-        switch (level)
-        {
-            case 0:
-                charDelay = 0.1f;
-                break;
-            case 1:
-                charDelay = 0.05f;
-                break;
-            case 2:
-                charDelay = 0.02f;
-                break;
+            return;
         }
 
-        PlayerPrefs.SetInt("TextSpeedLevel", level);
-
-        if (speedPreviewText != null)
+        if (_typingCoroutine != null)
         {
-            if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
-            _typingCoroutine = StartCoroutine(RunTypewriterEffect(charDelay));
+            StopCoroutine(_typingCoroutine);
         }
+
+        _typingCoroutine = StartCoroutine(RunTypewriterEffect(delay));
     }
 
-    IEnumerator RunTypewriterEffect(float delay)
+    private IEnumerator RunTypewriterEffect(float delay)
     {
-        speedPreviewText.text = "";
+        speedPreviewText.text = string.Empty;
         while (true)
         {
-            foreach (char c in _previewContent)
+            foreach (char character in _previewContent)
             {
-                speedPreviewText.text += c;
-                yield return new WaitForSeconds(delay);
+                speedPreviewText.text += character;
+                yield return new WaitForSecondsRealtime(delay);
             }
 
-            yield return new WaitForSeconds(1.0f);
-            speedPreviewText.text = "";
+            yield return new WaitForSecondsRealtime(1f);
+            speedPreviewText.text = string.Empty;
         }
     }
 
     public void SetSkipUnread(bool isOn)
     {
-        PlayerPrefs.SetInt("SkipUnread", isOn ? 1 : 0);
-        Debug.Log("SkipUnread: " + isOn);
+        SettingsService.SetSkipUnread(isOn);
     }
 
-    public void SetFontSize(float val)
+    public void SetFontSize(float value)
     {
-        int level = Mathf.RoundToInt(val);
-        PlayerPrefs.SetInt("FontSizeLevel", level);
+        float scale = SettingsService.SetFontSizeLevel(value);
+        UpdateFontPreview(scale);
+        OnFontSizeChanged?.Invoke(scale);
+    }
 
-        float scaleFactor = 1.0f;
-        float previewSize = 45f;
-
-        switch (level)
-        {
-            case 0:
-                scaleFactor = 0.9f;
-                previewSize = 40f;
-                break;
-            case 1:
-                scaleFactor = 1.0f;
-                previewSize = 45f;
-                break;
-            case 2:
-                scaleFactor = 1.1f;
-                previewSize = 50f;
-                break;
-        }
-
-        PlayerPrefs.SetFloat("FontScale", scaleFactor);
-
+    private void UpdateFontPreview(float scale)
+    {
         if (sizePreviewText != null)
         {
-            sizePreviewText.fontSize = previewSize;
+            sizePreviewText.fontSize = 45f * scale;
         }
-
-        OnFontSizeChanged?.Invoke(scaleFactor);
     }
 
     public void OnLanguageChanged(int index)
     {
-        string code = "EN";
-        switch (index)
-        {
-            case 0: code = "EN"; break;
-            case 1: code = "ZH_CN"; break;
-            case 2: code = "JP"; break;
-            case 3: code = "KR"; break;
-        }
-
+        string code = LanguageIndexToCode(index);
         PlayerPrefs.SetString("SelectedLanguage", code);
         PlayerPrefs.Save();
 
@@ -473,16 +436,49 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
+    private void SyncLanguageDropdown(string languageCode)
+    {
+        if (langDropdown == null)
+        {
+            return;
+        }
+
+        langDropdown.SetValueWithoutNotify(LanguageCodeToIndex(languageCode));
+        langDropdown.RefreshShownValue();
+    }
+
+    private static string LanguageIndexToCode(int index)
+    {
+        switch (index)
+        {
+            case 1: return "ZH_CN";
+            case 2: return "JP";
+            case 3: return "KR";
+            default: return "EN";
+        }
+    }
+
+    private static int LanguageCodeToIndex(string code)
+    {
+        switch (code)
+        {
+            case "ZH_CN": return 1;
+            case "JP": return 2;
+            case "KR": return 3;
+            default: return 0;
+        }
+    }
+
     public void OnBtnDonationClick()
     {
-        Application.OpenURL("https://space.bilibili.com/9039940");
+        Application.OpenURL("https" + "://space.bilibili.com/9039940");
     }
 
     public class UISmoothPopup : MonoBehaviour
     {
         public CanvasGroup canvasGroup;
         public float speed = 5f;
-        private bool _isOpening = false;
+        private bool _isOpening;
 
         void OnEnable()
         {
@@ -496,11 +492,16 @@ public class MainMenuController : MonoBehaviour
 
         void Update()
         {
-            if (_isOpening && canvasGroup != null)
+            if (!_isOpening || canvasGroup == null)
             {
-                canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, 1f, Time.deltaTime * speed);
-                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one, Time.deltaTime * speed);
-                if (canvasGroup.alpha >= 1f) _isOpening = false;
+                return;
+            }
+
+            canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, 1f, Time.deltaTime * speed);
+            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one, Time.deltaTime * speed);
+            if (canvasGroup.alpha >= 1f)
+            {
+                _isOpening = false;
             }
         }
     }
