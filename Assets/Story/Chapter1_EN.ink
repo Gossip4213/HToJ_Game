@@ -1,5 +1,3 @@
-INCLUDE Chapter2_EN.ink
-
 -> chapter1_intro
 
 === chapter1_intro ===
@@ -87,7 +85,7 @@ The result protects you from choosing a principle, but not from the consequence 
     #speaker: Ambrose
     I cannot treat the coin as authority. Heinz will take the dose, and I will accept responsibility for overriding the procedure.
     #speaker: The Judge
-        You abandon the procedure in favour of the urgent need before you.
+    You abandon the procedure in favour of the urgent need before you.
     -> end_dilemma
 
 // ------------------------------------------------------------
@@ -96,4 +94,5 @@ The result protects you from choosing a principle, but not from the consequence 
 #speaker: The Judge
 The second decision is recorded. The next case follows.
 
--> robin_hood_intro
+#load_scene: Chapter2_Test
+-> END
