@@ -6,6 +6,9 @@
 Ambrose, consider the tracks below.
 A runaway trolley is moving toward five workers on the main track. They cannot leave the track in time.
 Beside you is a lever that will divert the trolley onto a side track, where one worker is standing.
+-> trolley_choice
+
+=== trolley_choice ===
 The trolley cannot be stopped. Pulling the lever will redirect it; leaving the lever untouched will preserve its current course.
 What should be done?
 
@@ -14,23 +17,23 @@ What should be done?
     #speaker: Ambrose
     The mechanism is simple: one movement changes who is placed in danger.
     Pulling it would make the redirection deliberate. Leaving it untouched would allow the existing course to continue.
-    -> trolley_hub
+    -> trolley_choice
 
 + #id:TheFive [the five workers]
     #speaker: Ambrose
     Five people are trapped on the main track. Each has the same immediate claim to survival as the person on the side track.
-    -> trolley_hub
+    -> trolley_choice
 
 + #id:TheOne [the worker on the side track]
     #speaker: Ambrose
     One person stands on the side track, currently outside the trolley's path.
     Diverting the trolley would place that person in danger in order to spare the five.
-    -> trolley_hub
+    -> trolley_choice
 
 + #id:SilverCoin [the coin]
     #speaker: Ambrose
     Very normal.
-    -> trolley_hub
+    -> trolley_choice
 
 * [Pull the lever, divert trolley]
     #speaker: Ambrose

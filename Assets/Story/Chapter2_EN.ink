@@ -6,10 +6,10 @@
 #speaker: The Judge
 #bgm: Dilemma
 A severe winter has damaged the harvest across the county.
-A tax convoy is carrying 1,200 silver marks to the capital. Most of the money was collected from large landholders, while the rest came from merchants, tenant fees, and market tolls.
+A tax convoy is carrying numerous silver marks to the capital. Most of the money was collected from large landholders, while the rest came from merchants, tenant fees, and market tolls.
 The money is legally assigned to repair a flood-damaged bridge and to pay the road guards for the next two months.
-Robin Hood can seize the convoy and distribute the money through local parishes. The parish records indicate that doing so would provide food and medicine for about 150 households until the end of winter.
-If the convoy is seized, the bridge repair will probably be delayed and the guards may go unpaid. Three villages could be cut off during the spring floods, and travel on the county roads may become less secure.
+Robin Hood can seize the convoy and distribute the money through local parishes. The parish records indicate that doing so would provide food and medicine for the households until the end of winter.
+If the convoy is seized, the bridge repair will probably be delayed and the guards may go unpaid. Many people could be cut off during the spring floods, and travel on the county roads may become less secure.
 If the convoy continues, the public works can proceed as planned, but some households may face hunger before the next official relief shipment arrives.
 The sheriff has refused to redirect the funds, arguing that they are legally earmarked and that changing the budget could bring penalties from the Crown.
 Should Robin Hood seize the convoy and distribute the money?
@@ -31,13 +31,13 @@ The other protects public institutions and future safety while leaving the prese
 
 + #id:ReliefList [Review the parish relief list]
     #speaker: Ambrose
-    The list contains 150 households with little food remaining. Several include children, older people, or residents too ill to work.
+    The list contains the households with little food remaining. Several include children, older people, or residents too ill to work.
     The estimates are credible, but distributing the money now would not create a lasting relief system.
     -> robin_hood_hub
 
 + #id:BridgeLedger [Review the bridge and guard accounts]
     #speaker: Ambrose
-    The bridge is the main route for three villages. Engineers warn that another flood could make it unusable without repairs.
+    The bridge is the main route for the local people. Engineers warn that another flood could make it unusable without repairs.
     The guards protect merchants and travellers, though their service also helps enforce the same tax system Robin Hood opposes.
     -> robin_hood_hub
 
